@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { RouteEstudiantes } from "./estudiantes/estudiantes";
-import { RouteAdministrativos } from "./administrativos/administrativo";
+import { RouteUsuarios } from "./usuarios/usuarios";
 
 /**
  *
@@ -14,8 +13,7 @@ const router = Router();
  * Rutas cargadas
  *
  */
-router.use("/estudiantes", RouteEstudiantes);
-router.use("/administrativos", RouteAdministrativos);
+router.use("/usuarios", RouteUsuarios);
 
 /**
  *
