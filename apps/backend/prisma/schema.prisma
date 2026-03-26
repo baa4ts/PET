@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Definiciones
+enum Roles {
+  ESTUDIANTE
+  PROFESOR
+  ADMIN
+  NONE
+}
+
+model Usuario {
+  cedula String @id
+
+  primer_nombre  String
+  segundo_nombre String? // Opcional
+
+  primer_apellido  String
+  segundo_apellido String? // Opcional
+
+  // Datos personales
+  email    String  @unique
+  telefono String?
+
+  // Informacion de la cuenta
+  rol      Roles  @default(NONE)
+  passhash String
+
+  // Informacion de tiempos
+  creado_at      DateTime @default(now())
+  actualizado_at DateTime @updatedAt
+}
+
+// Tabla temporal KV
+model Session {
+  key         String   @id
+  value       Json
+  creado_at   DateTime @default(now())
+  vencimiento DateTime
+
+  @@index([vencimiento])
+}
