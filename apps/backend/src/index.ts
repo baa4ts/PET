@@ -30,7 +30,7 @@ App.use(morgan("combined"));
  * Router
  *
  */
-App.use("/", router);
+App.use("/api/v1", router);
 
 /**
  *
