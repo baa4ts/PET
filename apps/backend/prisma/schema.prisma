@@ -6,14 +6,6 @@ datasource db {
   provider = "sqlite"
 }
 
-// Definiciones
-enum Roles {
-  ESTUDIANTE
-  PROFESOR
-  ADMIN
-  NONE
-}
-
 model Usuario {
   cedula String @id
 
@@ -28,7 +20,7 @@ model Usuario {
   telefono String?
 
   // Informacion de la cuenta
-  rol      Roles  @default(NONE)
+  rol      String @default("0")
   passhash String
 
   // Informacion de tiempos
