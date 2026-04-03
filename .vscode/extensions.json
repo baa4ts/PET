@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-vscode.vscode-typescript-next",     // TypeScript Nightly (últimas features)
+    "DavidAnson.vscode-markdownlint",       // Linter para Markdown
+    "YoavBls.pretty-ts-errors",             // Mejora los errores de TypeScript
+    "Prisma.prisma",                        // Soporte para Prisma ORM
+    "rangav.vscode-thunder-client"          // Cliente HTTP / Postman-like
+  ]
+}
