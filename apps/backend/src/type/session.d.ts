@@ -6,5 +6,5 @@ type TypeSession = {
     segundo_apellido: string | null;
     email: string;
     telefono: string | null;
-    rol: string;
+    permisos: string;
 };

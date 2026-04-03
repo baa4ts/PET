@@ -3,7 +3,7 @@ import { SchemeLogin, SchemeRefresh, SchemeRegister } from "./usuarios.scheme";
 import { conPrisma } from "../../prestamos/conPrisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { SessionCheck } from "../../middleware/Session";
+import { SessionCheck, SessionLevelsCheck } from "../../middleware/Session";
 
 /**
  * Instancia
@@ -231,7 +231,7 @@ API.delete("/logout",
    * Chain of Responsibility
    */
   SessionCheck,
-
+  
   // Logica principal del end-point
   async (req: Request, res: Response) => {
     try {
@@ -241,7 +241,7 @@ API.delete("/logout",
       );
 
       return res.status(200).json({ message: "Session cerrada exitosamente" });
-    
+
     } catch (error: any) {
       if (error.code === "P2025") {
         return res.status(401).json({ message: "No se encontro la session" });

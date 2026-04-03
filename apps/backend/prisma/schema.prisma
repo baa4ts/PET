@@ -20,7 +20,7 @@ model Usuario {
   telefono String?
 
   // Informacion de la cuenta
-  rol      String @default("0")
+  permisos String @default("0")
   passhash String
 
   // Informacion de tiempos

@@ -33,3 +33,26 @@ export const SessionCheck = async (req: Request, res: Response, next: NextFuncti
         return res.status(401).json({ message: "token invalido o expirado" });
     }
 };
+
+/**
+ * Middleware para verificar si el usuario tiene alguno de los roles requeridos
+ * @requires {@link SessionCheck} debe ejecutarse antes en la cadena de middlewares
+ */
+export const SessionLevelsCheck = (roles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const usuario = req.usuario;
+
+        if (!usuario || !usuario.permisos) {
+            return res.status(401).json({ message: "sesion invalida" });
+        }
+
+        const userRoles = usuario.permisos.split(',');
+        const check = roles.some(role => userRoles.includes(role));
+
+        if (!check) {
+            return res.status(403).json({ message: "permisos insuficientes" });
+        }
+
+        next();
+    }
+}
