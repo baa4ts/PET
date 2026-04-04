@@ -1,9 +1,9 @@
 import { Request, Response, Router } from "express";
-import { SchemeLogin, SchemeRefresh, SchemeRegister } from "./usuarios.scheme";
+import { SchemeLogin, SchemeRegister } from "./usuarios.scheme";
 import { conPrisma } from "../../prestamos/conPrisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { SessionCheck, SessionLevelsCheck } from "../../middleware/Session";
+import { SessionCheck } from "../../middleware/Session";
 
 /**
  * Instancia

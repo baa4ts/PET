@@ -2,6 +2,7 @@ import { Request } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "node:fs";
+import { homePATH } from "../helpers/homePATH";
 
 export interface InterfaceArchivos {
     formatos: string[],
@@ -15,12 +16,10 @@ export const Archivos = ({ formatos, maxFiles, maxSizeFile }: InterfaceArchivos)
 
         // Destino donde se guardan los archivos
         destination: (req: Request, file, cb) => {
-            const dest = path.join(process.cwd(), process.env.UPLOADS!);
-            if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-            cb(null, dest);
+            cb(null, homePATH(process.env.STATIC!, true));
         },
 
-        // Renombrar los archivos con formato: dia-mes-año_hora-min-seg-mili-(4-radom char).ext
+        // Renombrar los archivos con formato: dia-mes-anio_hora-min-seg-mili-(4-radom char).ext
         filename: (req: Request, file, cb) => {
             const T = new Date();
             const nombre = `${T.getDate()}-${T.getMonth() + 1}-${T.getFullYear()}_${T.getHours()}-${T.getMinutes()}-${T.getSeconds()}-${T.getMilliseconds()}-${Math.random().toString(36).slice(2, 6)}`;
