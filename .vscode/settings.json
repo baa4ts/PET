@@ -18,7 +18,7 @@
   "chat.agent.enabled": false,
   "chat.checkpoints.enabled": false,
   "chat.agent.maxRequests": 0,
-  "chat.agentsControl.enabled": false,            // era "hidden" → valor correcto: booleano
+  "chat.agentsControl.enabled": "hidden",            // era "hidden" → valor correcto: booleano
   // chat.customAgentInSubagent.enabled → ELIMINADO (no existe en docs oficiales)
   // chat.agentSessionProjection.enabled  → ELIMINADO (ídem)
 
