@@ -23,7 +23,7 @@ API.post("/",
         if (!files || files.length === 0)
             return res.status(400).json({ error: "No se enviaron archivos" });
 
-        const archivos = files.map(f => f.filename);
+        const archivos = files.map(f => f.filename.split(".")[0]);
         return res.json({ Archivos: archivos });
     }
 );

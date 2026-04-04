@@ -40,7 +40,7 @@ API.post("/login", async (req: Request, res: Response) => {
     }
 
     // Comparar contraseña del input con hash de la DB
-    if (!(await bcrypt.compare(parse.data.password, usuario.passhash))) {
+    if (!(await bcrypt.compare(parse.data.password, usuario.pass_hash))) {
       return res
         .status(401)
         .json({ message: "Contraseña incorrecta", token: null });
@@ -49,7 +49,7 @@ API.post("/login", async (req: Request, res: Response) => {
     // Guardar la session en la base de datos
     await conPrisma(async (prisma) => {
       const vencimiento = new Date(Date.now() + 60 * 60 * 1000);
-      const { passhash, ...session } = usuario;
+      const { pass_hash, ...session } = usuario;
 
       await prisma.session.upsert({
         where: { key: usuario.cedula },
@@ -114,10 +114,10 @@ API.post("/register", async (req: Request, res: Response) => {
           primer_apellido: parse.data.primer_apellido,
           segundo_apellido: parse.data.segundo_apellido,
           telefono: parse.data.telefono,
-          passhash,
+          pass_hash: passhash,
         },
         omit: {
-          passhash: true,
+          pass_hash: true,
           creado_at: true,
           actualizado_at: true,
         },
@@ -151,7 +151,9 @@ API.post("/register", async (req: Request, res: Response) => {
   }
 });
 
-API.post("/refresh",
+
+API.get(
+  "/refresh",
 
   /**
    * Chain of Responsibility
@@ -161,68 +163,31 @@ API.post("/refresh",
   // Logica principal del end-point
   async (req: Request, res: Response) => {
     try {
-      const parse = SchemeRefresh.safeParse(req.body);
-
-      if (!parse.success) {
-        return res
-          .status(400)
-          .json({ message: parse.error.format(), token: null });
-      }
-
-      // Verificar firma y extraer cedula
-      const payload = jwt.verify(
-        parse.data.token,
-        process.env.JWT_SECRET!,
-      ) as jwt.JwtPayload;
-
-      // Buscar sesion por cedula (la key)
-      const session = await conPrisma((prisma) =>
-        prisma.session.findFirst({
-          where: {
-            key: payload.cedula,
-            vencimiento: { gt: new Date() },
-          },
-        }),
-      );
-
-      if (!session) {
-        return res
-          .status(401)
-          .json({ message: "Sesion no encontrada o vencida", token: null });
-      }
+      // ya garantizado por SessionCheck
+      const usuario = req.usuario!;
 
       // Renovar vencimiento de la sesion
       await conPrisma((prisma) =>
         prisma.session.update({
-          where: { key: payload.cedula },
+          where: { key: usuario.cedula },
           data: { vencimiento: new Date(Date.now() + 60 * 60 * 1000) }, // +1h
-        }),
+        })
       );
 
       // Generar nuevo token
       const newToken = jwt.sign(
-        { cedula: payload.cedula },
+        { cedula: usuario.cedula },
         process.env.JWT_SECRET!,
-        { expiresIn: "1h" },
+        { expiresIn: "1h" }
       );
 
       return res.status(200).json({ message: "OK", token: newToken });
     } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        return res.status(401).json({ message: "Token vencido", token: null });
-      }
-      if (error instanceof jwt.JsonWebTokenError) {
-        return res.status(401).json({ message: "Token invalido", token: null });
-      }
-      if (error instanceof jwt.NotBeforeError) {
-        return res
-          .status(401)
-          .json({ message: "Token aun no activo", token: null });
-      }
-
+      console.error(error);
       return res.status(500).json({ message: "Error interno", token: null });
     }
-  });
+  }
+);
 
 
 API.delete("/logout",
@@ -231,7 +196,7 @@ API.delete("/logout",
    * Chain of Responsibility
    */
   SessionCheck,
-  
+
   // Logica principal del end-point
   async (req: Request, res: Response) => {
     try {

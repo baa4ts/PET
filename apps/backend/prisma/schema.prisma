@@ -20,12 +20,49 @@ model Usuario {
   telefono String?
 
   // Informacion de la cuenta
-  permisos String @default("0")
-  passhash String
+  permisos  String @default("0") // array serializado: "0,1,2"
+  pass_hash String
 
   // Informacion de tiempos
   creado_at      DateTime @default(now())
   actualizado_at DateTime @updatedAt
+
+  // Noticias subidas por usuario
+  noticias Noticia[]
+
+  // Recursos subidos por el usuario
+  recursos Recurso[]
+}
+
+model Noticia {
+  id          String @id
+  titulo      String
+  slug        String @unique
+  descripcion String
+
+  // Relaciones
+  usuario       Usuario @relation(fields: [usuarioCedula], references: [cedula])
+  usuarioCedula String
+
+  recursos Recurso[] // una noticia puede no tener recursos
+
+  @@index([slug, id])
+}
+
+model Recurso {
+  id       String @id
+  resource String
+
+  // Datos
+  fecha      DateTime @default(now())
+  es_noticia Boolean  @default(false)
+
+  // Relacion
+  noticia   Noticia? @relation(fields: [noticiaId], references: [id])
+  noticiaId String?
+
+  usuario       Usuario @relation(fields: [usuarioCedula], references: [cedula])
+  usuarioCedula String
 }
 
 // Tabla temporal KV
