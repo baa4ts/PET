@@ -6,7 +6,7 @@
 pnpm dlx prisma migrate dev --name <nombre>
 ```
 
-**2. Generar cliente**
+## 2. Generar cliente
 ```bash
 pnpm dlx prisma generate
 ```
