@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { RouteUsuarios } from "./usuarios/usuarios";
+import { RouteTesting } from "./testing/testing";
 
 /**
  *
@@ -14,6 +15,7 @@ const router = Router();
  *
  */
 router.use("/usuarios", RouteUsuarios);
+router.use("/testing", RouteTesting);
 
 /**
  *
