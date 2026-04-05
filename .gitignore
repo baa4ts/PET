@@ -163,4 +163,4 @@ dist-ssr
 *.sw?
 *pnpm-workspace.yaml
 *.db
-apps/backend/uploads/
+apps/backend/static/

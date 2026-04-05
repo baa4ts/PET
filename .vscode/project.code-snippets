@@ -1,0 +1,19 @@
+{
+    "Multer Handle": {
+        "prefix": "multer-err",
+        "body": [
+            "// Control de error custom para multer. snippet: multer-err",
+            "(err: any, req: Request, res: Response, next: NextFunction) => {",
+            "    if (err instanceof multer.MulterError) {",
+            "        const mensajes: Record<string, string> = {",
+            "            LIMIT_FILE_SIZE: \"El archivo supera el tamano maximo permitido\",",
+            "            LIMIT_FILE_COUNT: \"Se supero el numero maximo de archivos\",",
+            "            LIMIT_UNEXPECTED_FILE: \"Campo de archivo inesperado\",",
+            "        };",
+            "        return res.status(400).json({ message: mensajes[err.code] ?? err.message });",
+            "    }",
+            "    next();",
+            "},"
+        ]
+    }
+}

@@ -152,8 +152,7 @@ API.post("/register", async (req: Request, res: Response) => {
 });
 
 
-API.get(
-  "/refresh",
+API.get("/refresh",
 
   /**
    * Chain of Responsibility
@@ -190,7 +189,7 @@ API.get(
 );
 
 
-API.delete("/logout",
+API.post("/logout",
 
   /**
    * Chain of Responsibility

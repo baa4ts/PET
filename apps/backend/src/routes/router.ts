@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { RouteUsuarios } from "./usuarios/usuarios";
-import { RouteTesting } from "./testing/testing";
+import { RouteNoticias } from "./noticias/noticias";
 
 /**
  *
@@ -15,7 +15,7 @@ const router = Router();
  *
  */
 router.use("/usuarios", RouteUsuarios);
-router.use("/testing", RouteTesting);
+router.use("/noticias", RouteNoticias);
 
 /**
  *

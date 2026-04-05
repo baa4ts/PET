@@ -35,10 +35,10 @@ model Usuario {
 }
 
 model Noticia {
-  id          String @id
+  id          Int      @id @default(autoincrement())
   titulo      String
-  slug        String @unique
   descripcion String
+  publicado   DateTime @default(now())
 
   // Relaciones
   usuario       Usuario @relation(fields: [usuarioCedula], references: [cedula])
@@ -46,11 +46,11 @@ model Noticia {
 
   recursos Recurso[] // una noticia puede no tener recursos
 
-  @@index([slug, id])
+  @@index([id])
 }
 
 model Recurso {
-  id       String @id
+  id       Int    @id @default(autoincrement())
   resource String
 
   // Datos
@@ -59,7 +59,7 @@ model Recurso {
 
   // Relacion
   noticia   Noticia? @relation(fields: [noticiaId], references: [id])
-  noticiaId String?
+  noticiaId Int?
 
   usuario       Usuario @relation(fields: [usuarioCedula], references: [cedula])
   usuarioCedula String
