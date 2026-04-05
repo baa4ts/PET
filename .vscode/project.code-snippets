@@ -15,5 +15,58 @@
             "    next();",
             "},"
         ]
+    },
+    "Route Init": {
+        "prefix": "route-init",
+        "body": [
+            "import { Request, Response, Router } from \"express\";",
+            "",
+            "/**",
+            " * Instancia",
+            " */",
+            "const API = Router();",
+            "",
+            "",
+            "/**",
+            " * Exports",
+            " */",
+            "export { API as Route${1:Nombre} };"
+        ]
+    },
+    "route-normal": {
+        "prefix": "route-normal",
+        "body": [
+            "API.${1|get,post,put,delete|}('/${2:ruta}', (req: Request, res: Response) => {",
+            "// Tu codigo aqui $0",
+            "});"
+        ]
+    },
+    "route-async": {
+        "prefix": "route-async",
+        "body": [
+            "API.${1|get,post,put,delete|}('/${2:ruta}', async (req: Request, res: Response) => {",
+            "// Tu codigo aqui $0",
+            "});"
+        ]
+    },
+    "route-extend": {
+        "prefix": "route-extend",
+        "body": [
+            "API.${1|get,post,put,delete|}('/${2:ruta}',",
+            "",
+            "    /**",
+            "     * Chain of Responsibility",
+            "     */",
+            "    SessionCheck,",
+            "    SessionLevelsCheck([\"${3:0}\"]),",
+            "",
+            "    // Logica principal del end-point",
+            "    async (req: Request, res: Response) => {",
+            "        // Usuario es implicito",
+            "        const usuario = req.usuario!;",
+            "        $0",
+            "    });",
+            ""
+        ]
     }
 }

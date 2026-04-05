@@ -32,6 +32,15 @@ model Usuario {
 
   // Recursos subidos por el usuario
   recursos Recurso[]
+
+  // Ausencias donde el usuario ES el docente que falta
+  ausencias Ausencia[] @relation(name: "AusenciaDocente")
+
+  // Ausencias que el usuario publico
+  ausencias_publicadas Ausencia[] @relation(name: "AusenciaPublicador")
+
+  // Eventos publicados por un usuario
+  eventos Eventos[]
 }
 
 model Noticia {
@@ -73,4 +82,34 @@ model Session {
   vencimiento DateTime
 
   @@index([vencimiento])
+}
+
+model Ausencia {
+  id      Int    @id @default(autoincrement())
+  materia String
+
+  // Docente que falta
+  usuario       Usuario @relation(name: "AusenciaDocente", fields: [usuarioCedula], references: [cedula])
+  usuarioCedula String
+
+  // Usuario que publica la ausencia
+  publicador       Usuario @relation(name: "AusenciaPublicador", fields: [publicadorCedula], references: [cedula])
+  publicadorCedula String
+
+  // Fechas
+  creado DateTime @default(now())
+}
+
+model Eventos {
+  id Int @id @default(autoincrement())
+
+  nombre      String
+  descripcion String
+
+  fecha  DateTime
+  creado DateTime @default(now())
+
+  // Relacion
+  usuario       Usuario? @relation(fields: [usuarioCedula], references: [cedula])
+  usuarioCedula String?
 }

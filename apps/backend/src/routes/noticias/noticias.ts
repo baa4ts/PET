@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { Archivos } from "../../middleware/Archivos";
-import { SessionCheck } from "../../middleware/Session";
+import { SessionCheck, SessionLevelsCheck } from "../../middleware/Session";
 import { SchemeNuevaNoticia } from "./noticias.scheme";
 import multer from "multer";
 import { conPrisma } from "../../prestamos/conPrisma";
@@ -17,6 +17,7 @@ API.post("/",
      */
 
     SessionCheck,
+    SessionLevelsCheck(["0"]),
 
     // Middleware para los archivos
     Archivos({
