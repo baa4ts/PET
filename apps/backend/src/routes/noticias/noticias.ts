@@ -20,7 +20,7 @@ API.post("/",
 
     // Middleware para los archivos
     Archivos({
-        formatos: ["image/jpeg", "image/png", "video/mp4", "image/gif"],
+        formatos: [".jpeg", ".png", ".mp4", ".gif"],
         maxFiles: 5,
         maxSizeFile: 25 * 1024 * 1024,
     }).array("recurso"),
@@ -78,6 +78,52 @@ API.post("/",
         }
     }
 );
+
+API.get("/", async (req: Request, res: Response) => {
+    try {
+        const limit = Number(req.query.limit) || 4;
+        const offset = Number(req.query.offset) || 0;
+
+        const noticias = await conPrisma(async (p) =>
+            p.noticia.findMany({
+                select: {
+                    id: true,
+                    titulo: true,
+                    descripcion: true,
+                    usuario: { select: { primer_nombre: true, primer_apellido: true } },
+                    recursos: {
+                        select: {
+                            resource: true
+                        }
+                    }
+                },
+                orderBy: {
+                    publicado: "desc"
+                },
+                take: limit,
+                skip: offset,
+            })
+        );
+
+        if (!noticias || noticias.length === 0) {
+            return res.status(404).json({
+                message: "No hay noticias disponibles",
+                noticias: null
+            });
+        }
+
+        return res.status(200).json({
+            message: "OK",
+            noticias
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error interno del servidor",
+            noticias: null
+        });
+    }
+});
 
 /**
  * Exports
