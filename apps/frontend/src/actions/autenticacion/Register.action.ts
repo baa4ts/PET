@@ -20,6 +20,6 @@ export const ActionRegister = async (body: Props): Promise<ActionResult> => {
     } catch (err: any) {
         if (err.response?.status === 409)
             return { ok: false, message: err.response.data.message };
-        return { ok: false, message: "Error de conexión" };
+        return { ok: false, message: "Error de conexion" };
     }
 };

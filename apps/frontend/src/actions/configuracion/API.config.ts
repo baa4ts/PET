@@ -28,6 +28,10 @@ API.interceptors.response.use(
             // Redireccion
             window.location.replace("/error/sin-permisos")
         }
+
+        if (error.response?.status === 403)
+            window.location.replace("/error/sin-permisos")
+
         return Promise.reject(error)
     }
 )

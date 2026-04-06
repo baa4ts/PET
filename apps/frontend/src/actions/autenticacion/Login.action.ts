@@ -16,6 +16,6 @@ export const ActionLogin = async (body: Props): Promise<ActionResult> => {
         return { ok: true, datos: response.data.usuario };
 
     } catch (_) {
-        return { ok: false, message: "Error de conexión" };
+        return { ok: false, message: "Error de conexion" };
     }
 };

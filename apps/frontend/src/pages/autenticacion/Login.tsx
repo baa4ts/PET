@@ -71,7 +71,7 @@ export const Login = () => {
                 type="password"
                 value={field.state.value}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Contraseña"
+                placeholder="Contrasena"
                 disabled={isLoading}
                 className="w-full h-12 p-2 border-2 border-gray-600 disabled:opacity-50"
               />

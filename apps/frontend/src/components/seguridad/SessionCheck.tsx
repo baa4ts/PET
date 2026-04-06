@@ -20,7 +20,7 @@ export const SessionCheck = ({ session = true, niveles }: Props) => {
 
     // verificar niveles
     if (niveles && niveles.length > 0) {
-        const nivelesUsuario = usuario.niveles?.split(",").map(Number) ?? []
+        const nivelesUsuario = usuario.permisos?.split(",").map(Number) ?? []
         const tienePermiso = niveles.some((n) => nivelesUsuario.includes(n))
         if (!tienePermiso) return <Navigate to="/error/sin-permisos" replace />
     }

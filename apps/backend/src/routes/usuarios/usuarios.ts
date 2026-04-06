@@ -159,7 +159,7 @@ API.post("/register", async (req: Request, res: Response) => {
       .status(201)
       .json({ message: "OK", usuario: { token, permisos: usuario.permisos } });
   } catch (error) {
-    return res.status(500).json({ message: "Error interno", token: null });
+    return res.status(500).json({ message: "Error interno", usuario: { token: null, permisos: null } });
   }
 });
 
@@ -178,12 +178,14 @@ API.get("/refresh",
       const usuario = req.usuario!;
 
       // Renovar vencimiento de la sesion
-      await conPrisma((prisma) =>
+      const s = await conPrisma((prisma) =>
         prisma.session.update({
           where: { key: usuario.cedula },
           data: { vencimiento: new Date(Date.now() + 60 * 60 * 1000) }, // +1h
+          select: { value: true },
         })
       );
+      const session = s.value as TypeSession;
 
       // Generar nuevo token
       const newToken = jwt.sign(
@@ -192,10 +194,10 @@ API.get("/refresh",
         { expiresIn: "1h" }
       );
 
-      return res.status(200).json({ message: "OK", token: newToken });
+      return res.status(200).json({ message: "OK", usuario: { token: newToken, permisos: session.permisos } });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ message: "Error interno", token: null });
+      return res.status(500).json({ message: "Error interno", usuario: { token: null, permisos: null } });
     }
   }
 );
