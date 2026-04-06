@@ -18,7 +18,8 @@ API.post("/login", async (req: Request, res: Response) => {
     if (!parse.success) {
       return res
         .status(400)
-        .json({ message: parse.error.format(), token: null });
+        .json({ message: parse.error.format(), usuario: { token: null, permisos: null } });
+
     }
 
     // Realizar la consulta
@@ -36,14 +37,16 @@ API.post("/login", async (req: Request, res: Response) => {
     if (!usuario) {
       return res
         .status(401)
-        .json({ message: "El usuario no existe", token: null });
+        .json({ message: "El usuario no existe", usuario: { token: null, permisos: null } });
+
     }
 
     // Comparar contraseña del input con hash de la DB
     if (!(await bcrypt.compare(parse.data.password, usuario.pass_hash))) {
       return res
         .status(401)
-        .json({ message: "Contraseña incorrecta", token: null });
+        .json({ message: "Contraseña incorrecta", usuario: { token: null, permisos: null } });
+
     }
 
     // Guardar la session en la base de datos
@@ -68,9 +71,13 @@ API.post("/login", async (req: Request, res: Response) => {
       { expiresIn: "1h" },
     );
 
-    return res.status(200).json({ message: "OK", token });
+    return res
+      .status(200)
+      .json({ message: "OK", usuario: { token, permisos: usuario.permisos } });
   } catch (error) {
-    return res.status(500).json({ message: "Error interno", token: null });
+    return res
+      .status(500)
+      .json({ message: "Error interno", usuario: { token: null, permisos: null } });
   }
 });
 
@@ -82,7 +89,7 @@ API.post("/register", async (req: Request, res: Response) => {
     if (!parse.success) {
       return res
         .status(400)
-        .json({ message: parse.error.format(), token: null });
+        .json({ message: parse.error.format(), usuario: { token: null, permisos: null } });
     }
 
     // Verificar si la cedula o email ya estan registrados
@@ -97,7 +104,7 @@ API.post("/register", async (req: Request, res: Response) => {
     if (existe) {
       return res
         .status(409)
-        .json({ message: "La cédula o email ya está registrado", token: null });
+        .json({ message: "La cédula o email ya está registrado", usuario: { token: null, permisos: null } });
     }
 
     // Hashear la contraseña
@@ -145,7 +152,9 @@ API.post("/register", async (req: Request, res: Response) => {
       { expiresIn: "1h" },
     );
 
-    return res.status(201).json({ message: "OK", token });
+    return res
+      .status(201)
+      .json({ message: "OK", usuario: { token, permisos: usuario.permisos } });
   } catch (error) {
     return res.status(500).json({ message: "Error interno", token: null });
   }
