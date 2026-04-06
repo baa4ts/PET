@@ -3,6 +3,7 @@ import { router } from "./routes/router";
 import morgan from "morgan"
 import "dotenv/config";
 import { homePATH } from "./helpers/homePATH";
+import cors from "cors";
 
 /**
  *
@@ -24,10 +25,14 @@ App.use(express.json());
 App.use(express.urlencoded({ extended: true }));
 
 // Logger
-App.use(morgan("combined"));
+App.use(morgan("dev"));
 
 // Archivos staticos
 App.use("/static", express.static(homePATH(process.env.STATIC!, true)))
+
+// CORS
+App.use(cors());
+
 
 /**
  *

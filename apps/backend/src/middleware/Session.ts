@@ -21,15 +21,14 @@ export const SessionCheck = async (req: Request, res: Response, next: NextFuncti
             p.session.findFirst({ where: { key: payload.cedula } })
         );
 
-        // comprobar sesion
-        if (!session || new Date(session.vencimiento) < new Date()) {
+        if (!session || new Date(session.vencimiento).getTime() < Date.now())
             return res.status(401).json({ message: "sesion invalida o vencida" });
-        }
 
-        req.usuario = JSON.parse(session.value as any) as TypeSession;
+        req.usuario = session.value as unknown as TypeSession;
 
         next();
-    } catch {
+    } catch (err) {
+        console.log(err)
         return res.status(401).json({ message: "token invalido o expirado" });
     }
 };

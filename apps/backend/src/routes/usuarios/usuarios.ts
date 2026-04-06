@@ -54,12 +54,15 @@ API.post("/login", async (req: Request, res: Response) => {
       const vencimiento = new Date(Date.now() + 60 * 60 * 1000);
       const { pass_hash, ...session } = usuario;
 
+      // Debug
+      // console.log(`\n Vencimiento guardado: ${vencimiento.toISOString()} \n Ahora: ${new Date().toISOString()} \n Diferencia: ${(vencimiento.getTime() - Date.now()) / 1000 / 60} minutos \n`)
+
       await prisma.session.upsert({
         where: { key: usuario.cedula },
-        update: { value: JSON.stringify(session), vencimiento },
+        update: { value: session, vencimiento },
         create: {
           key: usuario.cedula,
-          value: JSON.stringify(session),
+          value: session,
           vencimiento,
         },
       });
@@ -104,7 +107,7 @@ API.post("/register", async (req: Request, res: Response) => {
     if (existe) {
       return res
         .status(409)
-        .json({ message: "La cédula o email ya está registrado", usuario: { token: null, permisos: null } });
+        .json({ message: "La cedula o email ya esta registrado", usuario: { token: null, permisos: null } });
     }
 
     // Hashear la contraseña
@@ -137,10 +140,10 @@ API.post("/register", async (req: Request, res: Response) => {
 
       await prisma.session.upsert({
         where: { key: usuario.cedula },
-        update: { value: JSON.stringify(usuario), vencimiento },
+        update: { value: usuario, vencimiento },
         create: {
           key: usuario.cedula,
-          value: JSON.stringify(usuario),
+          value: usuario,
           vencimiento,
         },
       });

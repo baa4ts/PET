@@ -2,7 +2,7 @@ import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
 export type Usuario = {
-    cedula: string | null
+    token: string | null
     niveles: string | null
 }
 
@@ -18,21 +18,28 @@ export const useStoreUsuario = create<StoreUsuario>()(
     persist(
         (set) => ({
             usuario: {
-                cedula: null,
+                token: null,
                 niveles: null
             },
 
             estado: "DESAUTENTICADO",
 
-            save: (cedula, niveles) => set({
-                usuario: { cedula, niveles },
+            save: (token, niveles) => set({
+                usuario: { token, niveles },
                 estado: "AUTENTICADO"
             }),
 
-            clear: () => set({
-                usuario: { cedula: null, niveles: null },
-                estado: "DESAUTENTICADO"
-            })
+            clear: () => {
+
+                // borrar el store
+                set({
+                    usuario: { token: null, niveles: null },
+                    estado: "DESAUTENTICADO"
+                })
+
+                // Borrar la session persistente
+                localStorage.removeItem("session");
+            }
         }),
         { name: "session" }
     )

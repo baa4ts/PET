@@ -3,9 +3,13 @@ import { validarCedula } from "../../helpers/validarCedula";
 import { validarPassword } from "../../helpers/validarPassword";
 import { Link } from "react-router";
 import { useState } from "react";
+import { ActionLogin } from "../../actions/autenticacion/Login.action";
+import { useStoreUsuario } from "../../store/Usuario.store";
 
 export const Login = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isError, setError] = useState<string>("");
+  const { save } = useStoreUsuario()
 
   const Formulario = useForm({
     defaultValues: {
@@ -14,8 +18,16 @@ export const Login = () => {
     },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
-      await new Promise((r) => setTimeout(r, 4000));
-      // tu logica
+
+      const response = await ActionLogin(value);
+
+      if (!response.ok) {
+        setError(response.message);
+        setIsLoading(false);
+        return;
+      }
+
+      save(response.datos.token, response.datos.permisos);
       setIsLoading(false);
     }
   })
@@ -70,11 +82,17 @@ export const Login = () => {
           )}
         </Formulario.Field>
 
+        {isError && (
+          <div className="w-full h-12 border-2 font-mono p-2 flex items-center justify-center">
+            <span className="font-mono text-xs text-red-500">{isError}</span>
+          </div>
+        )}
+
         <button
           type="submit"
           disabled={isLoading}
           onClick={() => navigator.vibrate?.(50)}
-          className="w-full h-12 border-2 font-mono mt-5 cursor-pointer
+          className="w-full h-12 border-2 font-mono cursor-pointer
                      hover:bg-gray-100 active:bg-gray-200 transition-colors
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >

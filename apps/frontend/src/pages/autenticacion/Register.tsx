@@ -6,9 +6,13 @@ import { validarTexto } from "../../helpers/validarTexto"
 import { validarEmail } from "../../helpers/validarEmail"
 import { validarTelefono } from "../../helpers/validarTelefono"
 import { useState } from "react"
+import { ActionRegister } from "../../actions/autenticacion/Register.action"
+import { useStoreUsuario } from "../../store/Usuario.store"
 
 export const Register = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isError, setError] = useState<string>("");
+    const { save } = useStoreUsuario()
 
     const Formulario = useForm({
         defaultValues: {
@@ -21,8 +25,16 @@ export const Register = () => {
         },
         onSubmit: async ({ value }) => {
             setIsLoading(true);
-            await new Promise((r) => setTimeout(r, 4000));
-            // tu logica
+
+            const response = await ActionRegister(value);
+
+            if (!response.ok) {
+                setError(response.message);
+                setIsLoading(false);
+                return;
+            }
+
+            save(response.datos.token, response.datos.permisos);
             setIsLoading(false);
         }
     })
@@ -152,6 +164,12 @@ export const Register = () => {
                         </div>
                     )}
                 </Formulario.Field>
+
+                {isError && (
+                    <div className="w-full h-12 border-2 font-mono p-2 flex items-center justify-center">
+                        <span className="font-mono text-xs text-red-500">{isError}</span>
+                    </div>
+                )}
 
                 <button
                     type="submit"

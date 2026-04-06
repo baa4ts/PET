@@ -60,7 +60,7 @@ export const AppRouter = createBrowserRouter([
      *
      */
     {
-        element: <SessionCheck />,
+        element: <SessionCheck session={true} />,
         children: [
             { path: "/administracion", element: <S component={Administracion} /> }
         ]
