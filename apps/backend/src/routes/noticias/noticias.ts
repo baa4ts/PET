@@ -91,7 +91,6 @@ API.get("/", async (req: Request, res: Response) => {
                     id: true,
                     titulo: true,
                     descripcion: true,
-                    usuario: { select: { primer_nombre: true, primer_apellido: true } },
                     recursos: {
                         select: {
                             resource: true
