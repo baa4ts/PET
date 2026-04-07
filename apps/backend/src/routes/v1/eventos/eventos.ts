@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
-import { SessionCheck, SessionLevelsCheck } from "../../middleware/Session";
+import { SessionCheck, SessionLevelsCheck } from "../../../middleware/Session";
 import { SchemeEventos } from "./eventos.scheme";
-import { conPrisma } from "../../prestamos/conPrisma";
+import { conPrisma } from "../../../prestamos/conPrisma";
 
 
 /**

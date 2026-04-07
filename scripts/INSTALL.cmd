@@ -1,0 +1,2 @@
+start cmd.exe /c "cd apps\backend && pnpm install && cls && pnpm dlx prisma migrate dev --name Inicializacion && pnpm dlx prisma generate && pnpm approve-builds --all && exit"
+start cmd.exe /c "cd apps\frontend && pnpm install && cls && pnpm approve-builds --all && exit"

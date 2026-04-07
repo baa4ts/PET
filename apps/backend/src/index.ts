@@ -39,7 +39,7 @@ App.use(cors());
  * Router
  *
  */
-App.use("/api/v1", router);
+App.use("/api", router);
 
 /**
  *

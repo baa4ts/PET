@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { Archivos } from "../../middleware/Archivos";
-import { SessionCheck, SessionLevelsCheck } from "../../middleware/Session";
+import { Archivos } from "../../../middleware/Archivos";
+import { SessionCheck, SessionLevelsCheck } from "../../../middleware/Session";
 import { SchemeNuevaNoticia } from "./noticias.scheme";
 import multer from "multer";
-import { conPrisma } from "../../prestamos/conPrisma";
+import { conPrisma } from "../../../prestamos/conPrisma";
 
 /**
  * Instancia
@@ -87,6 +87,7 @@ API.get("/", async (req: Request, res: Response) => {
 
         const noticias = await conPrisma(async (p) =>
             p.noticia.findMany({
+                where: { publicado: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
                 select: {
                     id: true,
                     titulo: true,
