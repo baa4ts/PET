@@ -3,7 +3,7 @@
 
 **1. Migrar cambios a la BD**
 ```bash
-pnpm dlx prisma migrate dev --name <nombre>
+pnpm dlx prisma migrate dev --name nombre
 ```
 
 ## 2. Generar cliente
