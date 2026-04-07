@@ -41,11 +41,11 @@ API.post("/login", async (req: Request, res: Response) => {
 
     }
 
-    // Comparar contraseña del input con hash de la DB
+    // Comparar contrasena del input con hash de la DB
     if (!(await bcrypt.compare(parse.data.password, usuario.pass_hash))) {
       return res
         .status(401)
-        .json({ message: "Contraseña incorrecta", usuario: { token: null, permisos: null } });
+        .json({ message: "Contrasena incorrecta", usuario: { token: null, permisos: null } });
 
     }
 
@@ -110,7 +110,7 @@ API.post("/register", async (req: Request, res: Response) => {
         .json({ message: "La cedula o email ya esta registrado", usuario: { token: null, permisos: null } });
     }
 
-    // Hashear la contraseña
+    // Hashear la contrasena
     const passhash = await bcrypt.hash(parse.data.password, 10);
 
     // Crear el usuario (sin passhash ni timestamps en el retorno)
