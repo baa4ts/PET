@@ -1,27 +1,51 @@
-type Eventos = {
-    nombre: string;
-    descripcion: string;
-    fecha: Date;
-    id: number;
-    usuario: {
-        primer_nombre: string;
-        primer_apellido: string;
-    } | null;
-}[];
+type ActionNoticiasResponse = {
+    message: string;
+    noticias: Noticia[];
+}
 
-type Noticias = {
+type Noticia = {
     id: number;
     titulo: string;
     descripcion: string;
-    recursos: {
-        resource: string;
-    }[];
-}[];
+    recursos: Recurso[];
+}
 
-type Ausencias = {
+type Recurso = {
+    resource: string;
+}
+
+type ActionAusenciasResponse = {
+    message: string;
+    ausencias: Ausencia[];
+}
+
+type Ausencia = {
     materia: string;
-    usuario: {
-        primer_nombre: string;
-        primer_apellido: string;
-    };
-}[];
+    usuario: Usuario;
+    creado: Date;
+}
+
+type Usuario = {
+    primer_nombre: string;
+    primer_apellido: string;
+}
+
+
+
+type ActionEventosResponse = {
+    message: string;
+    eventos: Evento[];
+}
+
+type Evento = {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    fecha: Date;
+    usuario: Usuario;
+}
+
+type Usuario = {
+    primer_nombre: string;
+    primer_apellido: string;
+}

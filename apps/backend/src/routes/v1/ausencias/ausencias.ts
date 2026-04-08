@@ -55,7 +55,8 @@ API.get("/", async (req: Request, res: Response) => {
                     materia: true,
                     usuario: {
                         select: { primer_nombre: true, primer_apellido: true }
-                    }
+                    },
+                    creado: true
                 },
                 orderBy: { creado: "desc" },
                 take: limit,

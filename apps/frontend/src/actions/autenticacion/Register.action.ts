@@ -11,7 +11,7 @@ export interface Props {
 
 export const ActionRegister = async (body: Props): Promise<ActionResult> => {
     try {
-        const response = await API.post<AutenticacionResponse>("/usuarios/register", body);
+        const response = await API.post<AutenticacionResponse>("/v1/usuarios/register", body);
 
         if (response.status === 201)
             return { ok: true, datos: response.data.usuario };

@@ -1,7 +1,31 @@
 @echo off
-set BEARER=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjZWR1bGEiOiIxMjM0NTY3OCIsImlhdCI6MTc3NTU4NzU2OSwiZXhwIjoxNzc1NTkxMTY5fQ.AIcUiTgZr6UXzvyGwDaKICwDo2GmU0xy2tzVNuH1X9Q
+set BEARER=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjZWR1bGEiOiIxMjM0NTY3OCIsImlhdCI6MTc3NTYxMTg5NiwiZXhwIjoxNzc1NjE1NDk2fQ.KtDL3Ah69c-S7G-KUmfOcwLeE_3nVtDMz5IyTAjPFHI
 set BASE_URL=http://localhost:3000/api/v1
 set FILE=img.png
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000001\",\"primer_nombre\":\"Juan\",\"segundo_nombre\":\"Carlos\",\"primer_apellido\":\"Perez\",\"segundo_apellido\":\"Lopez\",\"email\":\"juan1@example.com\",\"telefono\":\"099111111\",\"password\":\"password123\"}"
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000002\",\"primer_nombre\":\"Maria\",\"segundo_nombre\":\"Elena\",\"primer_apellido\":\"Gomez\",\"segundo_apellido\":\"Fernandez\",\"email\":\"maria2@example.com\",\"telefono\":\"099222222\",\"password\":\"password123\"}"
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000003\",\"primer_nombre\":\"Luis\",\"segundo_nombre\":\"Alberto\",\"primer_apellido\":\"Rodriguez\",\"segundo_apellido\":\"Sosa\",\"email\":\"luis3@example.com\",\"telefono\":\"099333333\",\"password\":\"password123\"}"
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000004\",\"primer_nombre\":\"Ana\",\"segundo_nombre\":\"Beatriz\",\"primer_apellido\":\"Martinez\",\"segundo_apellido\":\"Diaz\",\"email\":\"ana4@example.com\",\"telefono\":\"099444444\",\"password\":\"password123\"}"
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000005\",\"primer_nombre\":\"Pedro\",\"segundo_nombre\":\"Jose\",\"primer_apellido\":\"Silva\",\"segundo_apellido\":\"Ruiz\",\"email\":\"pedro5@example.com\",\"telefono\":\"099555555\",\"password\":\"password123\"}"
+
+curl -X POST %BASE_URL%/usuarios/register ^
+-H "Content-Type: application/json" ^
+-d "{\"cedula\":\"10000006\",\"primer_nombre\":\"Lucia\",\"segundo_nombre\":\"Mariana\",\"primer_apellido\":\"Torres\",\"segundo_apellido\":\"Vega\",\"email\":\"lucia6@example.com\",\"telefono\":\"099666666\",\"password\":\"password123\"}"
 
 echo === CREANDO NOTICIAS ===
 
@@ -46,32 +70,32 @@ echo === CREANDO AUSENCIAS ===
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Matematica\"}"
+-d "{\"cedula\":\"10000001\",\"materia\":\"Matematica\"}"
 
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Historia\"}"
+-d "{\"cedula\":\"10000002\",\"materia\":\"Historia\"}"
 
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Fisica\"}"
+-d "{\"cedula\":\"10000003\",\"materia\":\"Fisica\"}"
 
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Quimica\"}"
+-d "{\"cedula\":\"10000003\",\"materia\":\"Quimica\"}"
 
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Biologia\"}"
+-d "{\"cedula\":\"10000005\",\"materia\":\"Biologia\"}"
 
 curl -X POST %BASE_URL%/ausencias ^
 -H "Content-Type: application/json" ^
 -H "Authorization: Bearer %BEARER%" ^
--d "{\"cedula\":\"12345678\",\"materia\":\"Geografia\"}"
+-d "{\"cedula\":\"10000006\",\"materia\":\"Geografia\"}"
 
 echo === CREANDO EVENTOS ===
 

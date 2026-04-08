@@ -7,7 +7,7 @@ export interface Props {
 
 export const ActionLogin = async (body: Props): Promise<ActionResult> => {
     try {
-        const response = await API.post<AutenticacionResponse>("/usuarios/login", body);
+        const response = await API.post<AutenticacionResponse>("/v1/usuarios/login", body);
 
         if (response.status !== 200) {
             return { ok: false, message: "Credenciales incorrectas" };
