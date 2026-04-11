@@ -1,51 +1,68 @@
-import express from "express";
-import { router } from "./routes/router";
+import "dotenv/config"
+
+import path from "node:path"
+
+import { apiReference } from "@scalar/express-api-reference"
+import { toNodeHandler } from "better-auth/node"
+import cors from "cors"
+import express from "express"
 import morgan from "morgan"
-import "dotenv/config";
-import { homePATH } from "./helpers/homePATH";
-import cors from "cors";
+
+import { auth } from "./configuracion/Auth"
+import { Home } from "./Helpers/Home"
+import { AppRouter } from "./routes/Routes"
+
+const app = express()
 
 /**
- *
- * Instancia
- *
+ * CORS
  */
-const App = express();
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}))
 
 /**
- *
- * Configuraciones
- *
+ * Logger 
  */
+morgan.token("ip", (req: express.Request) => req.ip ?? req.socket.remoteAddress ?? "-")
 
-// Json
-App.use(express.json());
-
-// Forms
-App.use(express.urlencoded({ extended: true }));
-
-// Logger
-App.use(morgan("dev"));
-
-// Archivos staticos
-App.use("/static", express.static(homePATH(process.env.STATIC!, true)))
-
-// CORS
-App.use(cors());
-
+app.use(morgan(
+    "[:date[iso]] :method :url :status :res[content-length]b - :response-time ms | ip=:ip"
+))
 
 /**
- *
- * Router
- *
+ * Gestor de autenticacion
  */
-App.use("/api", router);
+app.all("/api/auth/*splat", toNodeHandler(auth))
 
 /**
- *
- * Listener
- *
+ * Middlewares
  */
-App.listen(process.env.PORT, () => {
-  console.log(` Server: http://localhost:${process.env.PORT}`);
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+/**
+ * Gestor de documentacion
+ */
+app.use("/api/docs/openapi.yaml", (req, res) => {
+    res.sendFile(path.resolve("./docs/openapi.yaml"));
 });
+
+app.use("/api/docs", apiReference({
+    url: "/api/docs/openapi.yaml",
+}));
+
+/**
+ * Servir archivos staticos
+ */
+app.use("/static", express.static(Home(process.env.STATIC!, true)));
+
+/**
+ * Router
+ */
+app.use("/api", AppRouter);
+
+app.listen(3000, () => {
+    console.log("Server running on http://localhost:3000")
+})

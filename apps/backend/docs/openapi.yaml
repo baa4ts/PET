@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+    description: Desarrollo
+
+tags:
+  - name: Eventos
+    description: Endpoints de eventos
+  - name: Ausencias
+    description: Endpoints de ausencias
+  - name: Noticias
+    description: Endpoints de noticias
+
+components:
+  schemas:
+    Evento:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Conferencia de tecnologia
+        descripcion:
+          type: string
+          example: Evento sobre las ultimas tendencias
+        fecha:
+          type: string
+          format: date-time
+          example: 2026-05-01T10:00:00.000Z
+        creado:
+          type: string
+          format: date-time
+          example: 2026-04-01T08:00:00.000Z
+
+    Ausencia:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        materia:
+          type: string
+          example: Matematica
+        creado:
+          type: string
+          format: date-time
+          example: 2026-04-11T08:00:00.000Z
+        docenteId:
+          type: string
+          example: clxk2j3r40000abc123
+        publicadorId:
+          type: string
+          example: clxk2j3r40000abc456
+
+    Recurso:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        resource:
+          type: string
+          example: 11-4-2026_10-30-00-123-ab3f.jpg
+        fecha:
+          type: string
+          format: date-time
+          example: 2026-04-11T10:30:00.000Z
+        es_noticia:
+          type: boolean
+          example: true
+        noticiaId:
+          type: integer
+          example: 1
+
+    Noticia:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        titulo:
+          type: string
+          example: Nueva actualizacion del sistema
+        descripcion:
+          type: string
+          example: Se implementaron mejoras en el rendimiento
+        publicado:
+          type: string
+          format: date-time
+          example: 2026-04-11T08:00:00.000Z
+        recursos:
+          type: array
+          items:
+            $ref: "#/components/schemas/Recurso"
+
+  responses:
+    NoAutorizado:
+      description: Sin sesion activa
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensaje:
+                type: string
+                example: No autorizado
+
+    SinPermisos:
+      description: Sin permisos suficientes
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensaje:
+                type: string
+                example: Sin permisos
+
+    DatosInvalidos:
+      description: Body no paso la validacion de Zod
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensaje:
+                type: string
+                example: Datos invalidos
+              data:
+                nullable: true
+                example: null
+
+    ErrorServidor:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mensaje:
+                type: string
+                example: Error en el servidor
+              data:
+                nullable: true
+                example: null
+
+paths:
+  /eventos:
+    get:
+      tags: [Eventos]
+      summary: Obtener eventos proximos
+      description: Retorna todos los eventos que no hayan vencido aun, ordenados por fecha ascendente.
+      responses:
+        "200":
+          description: OK o sin resultados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: OK
+                  eventos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Evento"
+              examples:
+                con_resultados:
+                  summary: Con eventos
+                  value:
+                    mensaje: OK
+                    eventos:
+                      - id: 1
+                        nombre: Conferencia de tecnologia
+                        descripcion: Evento sobre las ultimas tendencias
+                        fecha: "2026-05-01T10:00:00.000Z"
+                        creado: "2026-04-01T08:00:00.000Z"
+                sin_resultados:
+                  summary: Sin eventos
+                  value:
+                    mensaje: No hay eventos disponibles
+                    eventos: []
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+    post:
+      tags: [Eventos]
+      summary: Crear evento
+      description: Middlewares `requiereAuth` `requierePermiso("eventos", "crear")`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nombre, descripcion, fecha]
+              properties:
+                nombre:
+                  type: string
+                  example: Conferencia de tecnologia
+                descripcion:
+                  type: string
+                  example: Evento sobre las ultimas tendencias
+                fecha:
+                  type: string
+                  format: date-time
+                  example: 2026-05-01T10:00:00.000Z
+      responses:
+        "201":
+          description: Evento creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Evento creado
+                  eventos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Evento"
+        "400":
+          $ref: "#/components/responses/DatosInvalidos"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/SinPermisos"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+  /ausencias:
+    get:
+      tags: [Ausencias]
+      summary: Obtener ausencias
+      description: Retorna todas las ausencias ordenadas por fecha descendente.
+      responses:
+        "200":
+          description: OK o sin resultados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: OK
+                  ausencias:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ausencia"
+              examples:
+                con_resultados:
+                  summary: Con ausencias
+                  value:
+                    mensaje: OK
+                    ausencias:
+                      - id: 1
+                        materia: Matematica
+                        creado: "2026-04-11T08:00:00.000Z"
+                        docenteId: clxk2j3r40000abc123
+                        publicadorId: clxk2j3r40000abc456
+                sin_resultados:
+                  summary: Sin ausencias
+                  value:
+                    mensaje: No hay ausencias disponibles
+                    ausencias: []
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+    post:
+      tags: [Ausencias]
+      summary: Crear ausencia
+      description: Middlewares `requiereAuth` `requierePermiso("ausencias", "crear")`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [materia, docenteId]
+              properties:
+                materia:
+                  type: string
+                  example: Matematica
+                docenteId:
+                  type: string
+                  example: clxk2j3r40000abc123
+      responses:
+        "201":
+          description: Ausencia creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Ausencia creada
+                  ausencias:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Ausencia"
+        "400":
+          $ref: "#/components/responses/DatosInvalidos"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/SinPermisos"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+  /noticias:
+    get:
+      tags: [Noticias]
+      summary: Obtener noticias recientes
+      description: Retorna todas las noticias publicadas en las ultimas 24 horas, ordenadas por fecha descendente.
+      responses:
+        "200":
+          description: OK o sin resultados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: OK
+                  noticias:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Noticia"
+              examples:
+                con_resultados:
+                  summary: Con noticias
+                  value:
+                    mensaje: OK
+                    noticias:
+                      - id: 1
+                        titulo: Nueva actualizacion del sistema
+                        descripcion: Se implementaron mejoras en el rendimiento
+                        publicado: "2026-04-11T08:00:00.000Z"
+                        recursos:
+                          - id: 1
+                            resource: 11-4-2026_10-30-00-123-ab3f.jpg
+                            fecha: "2026-04-11T10:30:00.000Z"
+                            es_noticia: true
+                            noticiaId: 1
+                sin_resultados:
+                  summary: Sin noticias
+                  value:
+                    mensaje: No hay noticias disponibles
+                    noticias: []
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+    post:
+      tags: [Noticias]
+      summary: Crear noticia
+      description: Middlewares `requiereAuth` `requierePermiso("noticias", "crear")`. Acepta hasta 5 archivos en el campo `recursos`.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [titulo, descripcion]
+              properties:
+                titulo:
+                  type: string
+                  example: Nueva actualizacion del sistema
+                descripcion:
+                  type: string
+                  example: Se implementaron mejoras en el rendimiento
+                recursos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "201":
+          description: Noticia creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Noticia creada
+                  noticias:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Noticia"
+        "400":
+          $ref: "#/components/responses/DatosInvalidos"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/SinPermisos"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
