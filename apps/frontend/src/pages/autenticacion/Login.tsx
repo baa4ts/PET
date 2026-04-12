@@ -101,7 +101,7 @@ export const Login = () => {
                 {/* Link a registro */}
                 <p className="text-sm text-center">
                     No tienes cuenta?{" "}
-                    <Link className="text-blue-800 underline" to="/auth/register">
+                    <Link className="text-blue-800 underline" to="/autenticacion/register">
                         Registrate
                     </Link>
                 </p>

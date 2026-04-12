@@ -4,6 +4,6 @@ import { Client } from "@/providers/Client.provider"
 
 export async function requireSession() {
     const { data } = await Client.getSession()
-    if (!data) throw redirect("/usuario/login")
+    if (!data) throw redirect("/autenticacion/login")
     return data
 }

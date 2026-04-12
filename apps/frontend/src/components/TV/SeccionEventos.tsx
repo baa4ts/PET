@@ -13,12 +13,18 @@ export const SeccionEventos = () => {
     });
 
     const [actual, setActual] = useState(0);
+    const [visible, setVisible] = useState(true);
 
     useEffect(() => {
         if (eventos.length === 0) return;
 
         const interval = setInterval(() => {
-            setActual(prev => (prev + 1) % eventos.length);
+            setVisible(false);
+
+            setTimeout(() => {
+                setActual(prev => (prev + 1) % eventos.length);
+                setVisible(true);
+            }, 400);
         }, 8000);
 
         return () => clearInterval(interval);
@@ -33,7 +39,10 @@ export const SeccionEventos = () => {
             </div>
 
             {evento && (
-                <div className="flex flex-col justify-between flex-1 p-3">
+                <div
+                    className="flex flex-col justify-between flex-1 p-3 transition-opacity duration-400"
+                    style={{ opacity: visible ? 1 : 0 }}
+                >
                     <div>
                         <p className="text-xl font-bold text-gray-800">{evento.nombre}</p>
                         <p className="text-sm text-gray-500 mt-1">{evento.descripcion}</p>

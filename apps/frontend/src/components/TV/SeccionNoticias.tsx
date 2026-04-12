@@ -6,7 +6,8 @@ import { formatearFecha } from "@/helpers/formatearFecha";
 
 export const SeccionNoticias = () => {
   const [actual, setActual] = useState(0);
-  const [restante, setRestante] = useState(5);
+  const [restante, setRestante] = useState(4);
+  const [visible, setVisible] = useState(true);
 
   const { data: noticias = [] } = useQuery({
     queryKey: ["noticias-tv"],
@@ -19,12 +20,17 @@ export const SeccionNoticias = () => {
     if (noticias.length === 0) return;
 
     const interval = setInterval(() => {
-      setActual(prev => (prev + 1) % noticias.length);
-      setRestante(5);
-    }, 4000);
+      setVisible(false);
+
+      setTimeout(() => {
+        setActual(prev => (prev + 1) % noticias.length);
+        setRestante(4);
+        setVisible(true);
+      }, 400);
+    }, 5000);
 
     const countdown = setInterval(() => {
-      setRestante(prev => (prev <= 1 ? 5 : prev - 1));
+      setRestante(prev => (prev <= 1 ? 4 : prev - 1));
     }, 1000);
 
     return () => {
@@ -48,9 +54,13 @@ export const SeccionNoticias = () => {
           <img
             alt=""
             className="w-full h-full object-contain"
+            style={{ opacity: visible ? 1 : 0, transition: 'opacity 400ms' }}
             src={"http://localhost:3000/static/" + noticia.recursos[0].resource}
           />
-          <span className="absolute bottom-4 left-4 right-4 z-50 flex flex-col gap-1 bg-black/60 backdrop-blur-sm rounded p-3">
+          <span
+            className="absolute bottom-4 left-4 right-4 z-50 flex flex-col gap-1 bg-black/60 backdrop-blur-sm rounded p-3"
+            style={{ opacity: visible ? 1 : 0, transition: 'opacity 400ms' }}
+          >
             <div className="flex flex-row items-baseline gap-4">
               <h1 className="text-white text-2xl font-bold flex-1/2">{noticia.titulo}</h1>
               <p className="text-zinc-300 text-sm flex-1/2 flex items-center justify-end pr-5">
