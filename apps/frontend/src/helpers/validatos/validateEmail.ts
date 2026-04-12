@@ -1,10 +1,11 @@
 type Params = { value: string };
 
 const ALLOWED_DOMAINS = new Set([
+  "admin.com",
   "gmail.com",
   "googlemail.com",
   "proton.me",
-  "protonmail.com",
+  "protonmail.com"
 ]);
 
 export function validateEmail({ value }: Params): string | undefined {

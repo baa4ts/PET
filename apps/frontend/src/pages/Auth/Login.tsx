@@ -1,13 +1,16 @@
 import { useForm } from '@tanstack/react-form'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { validateEmail } from '@/helpers/validatos/validateEmail'
+import { Client } from '@/providers/Client.provider'
 
 export const Login = () => {
 
     const navigate = useNavigate()
+    const [loading, setLoading] = useState<boolean>(false);
 
     const Formulario = useForm({
         defaultValues: {
@@ -16,8 +19,17 @@ export const Login = () => {
         },
 
         onSubmit: async ({ value }) => {
-            console.log("Login data:", value)
-            navigate("/")
+            setLoading(true);
+
+            try {
+                const { error } = await Client.signIn.email(value);
+
+                if (error) return;
+
+                navigate("/");
+            } finally {
+                setLoading(false);
+            }
         }
     })
 
@@ -40,6 +52,7 @@ export const Login = () => {
                             <FieldLabel htmlFor="email">Email</FieldLabel>
                             <Input
                                 autoComplete="email"
+                                disabled={loading}
                                 id="email"
                                 onBlur={F.handleBlur}
                                 onChange={(e) => F.handleChange(e.target.value)}
@@ -58,9 +71,10 @@ export const Login = () => {
                 <Formulario.Field name='password'>
                     {(F) => (
                         <Field>
-                            <FieldLabel htmlFor="password">Contrasena</FieldLabel>
+                            <FieldLabel htmlFor="password">Contraseña</FieldLabel>
                             <Input
                                 autoComplete="current-password"
+                                disabled={loading}
                                 id="password"
                                 onBlur={F.handleBlur}
                                 onChange={(e) => F.handleChange(e.target.value)}
@@ -73,7 +87,14 @@ export const Login = () => {
                     )}
                 </Formulario.Field>
 
-                <button className="bg-black text-white py-2 rounded" type="submit">
+                <button
+                    className="bg-black text-white py-2 rounded flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={loading}
+                    type="submit"
+                >
+                    {loading && (
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    )}
                     Iniciar sesion
                 </button>
 
