@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { validateEmail } from '@/helpers/validatos/validateEmail'
 
 export const Register = () => {
 
@@ -52,7 +53,7 @@ export const Register = () => {
                 </Formulario.Field>
 
                 {/* EMAIL */}
-                <Formulario.Field name='email'>
+                <Formulario.Field name='email' validators={{ onBlur: validateEmail, onSubmit: validateEmail }}>
                     {(F) => (
                         <Field>
                             <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -65,7 +66,9 @@ export const Register = () => {
                                 type="email"
                                 value={F.state.value}
                             />
-                            <FieldDescription>Ingresa tu correo.</FieldDescription>
+                            <FieldDescription style={{ color: F.state.meta.errors?.[0] ? 'red' : undefined }}>
+                                {F.state.meta.errors?.[0] ?? 'Ingresa tu correo.'}
+                            </FieldDescription>
                         </Field>
                     )}
                 </Formulario.Field>
