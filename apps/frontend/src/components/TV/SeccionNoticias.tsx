@@ -6,7 +6,7 @@ import { formatearFecha } from "@/helpers/formatearFecha";
 
 export const SeccionNoticias = () => {
   const [actual, setActual] = useState(0);
-  const [restante, setRestante] = useState(4);
+  const [restante, setRestante] = useState(5);
   const [visible, setVisible] = useState(true);
 
   const { data: noticias = [] } = useQuery({
@@ -24,13 +24,13 @@ export const SeccionNoticias = () => {
 
       setTimeout(() => {
         setActual(prev => (prev + 1) % noticias.length);
-        setRestante(4);
+        setRestante(5);
         setVisible(true);
       }, 400);
     }, 5000);
 
     const countdown = setInterval(() => {
-      setRestante(prev => (prev <= 1 ? 4 : prev - 1));
+      setRestante(prev => (prev <= 1 ? 5 : prev - 1));
     }, 1000);
 
     return () => {
