@@ -29,8 +29,7 @@ export const Register = () => {
 
                 if (error) return;
 
-                navigate("/")
-
+                navigate("/usuario");
             } finally {
                 setLoading(false)
             }

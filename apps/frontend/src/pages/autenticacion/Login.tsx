@@ -26,7 +26,7 @@ export const Login = () => {
 
                 if (error) return;
 
-                navigate("/");
+                navigate("/usuario");
             } finally {
                 setLoading(false);
             }

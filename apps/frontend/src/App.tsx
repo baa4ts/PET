@@ -1,10 +1,14 @@
 import { RouterProvider } from "react-router"
 
-import { AppRouter } from "./App.router"
+import { AppRouter } from "./pages/App.router"
+import { TanStack } from "./providers/TanStack"
+
 
 const App = () => {
   return (
-    <RouterProvider router={AppRouter} />
+    <TanStack>
+      <RouterProvider router={AppRouter} />
+    </TanStack>
   )
 }
 

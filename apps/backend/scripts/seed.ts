@@ -234,11 +234,11 @@ async function main() {
   console.log("📅 Creando eventos...")
 
   const eventosData = [
-    { nombre: "Feria de ciencias", dias: 5 },
-    { nombre: "Olimpiadas escolares", dias: 10 },
-    { nombre: "Acto de graduacion", dias: 20 },
-    { nombre: "Dia del estudiante", dias: 30 },
-    { nombre: "Expo proyectos", dias: 45 },
+    { nombre: "Feria de ciencias", dias: 5, descripcion: "Exposición de proyectos científicos de los estudiantes" },
+    { nombre: "Olimpiadas escolares", dias: 10, descripcion: "Competencia deportiva entre cursos del instituto" },
+    { nombre: "Acto de graduacion", dias: 20, descripcion: "Ceremonia de egreso para los estudiantes de último año" },
+    { nombre: "Dia del estudiante", dias: 30, descripcion: "Celebración y actividades recreativas para todos los alumnos" },
+    { nombre: "Expo proyectos", dias: 45, descripcion: "Muestra de proyectos finales de las distintas carreras" },
   ]
 
   for (let i = 0; i < 5; i++) {
@@ -247,7 +247,7 @@ async function main() {
     const evento = await prisma.eventos.create({
       data: {
         nombre: eventosData[i].nombre,
-        descripcion: `Descripcion del evento: ${eventosData[i].nombre}`,
+        descripcion: eventosData[i].descripcion,
         fecha,
         userId: usuariosEventos[i].id,
       }

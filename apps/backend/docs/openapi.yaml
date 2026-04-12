@@ -51,12 +51,12 @@ components:
           type: string
           format: date-time
           example: 2026-04-11T08:00:00.000Z
-        docenteId:
-          type: string
-          example: clxk2j3r40000abc123
-        publicadorId:
-          type: string
-          example: clxk2j3r40000abc456
+        docente:
+          type: object
+          properties:
+            name:
+              type: string
+              example: Juan Perez
 
     Recurso:
       type: object
@@ -265,8 +265,8 @@ paths:
                       - id: 1
                         materia: Matematica
                         creado: "2026-04-11T08:00:00.000Z"
-                        docenteId: clxk2j3r40000abc123
-                        publicadorId: clxk2j3r40000abc456
+                        docente:
+                          name: Juan Perez
                 sin_resultados:
                   summary: Sin ausencias
                   value:

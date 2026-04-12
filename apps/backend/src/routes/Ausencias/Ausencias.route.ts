@@ -36,6 +36,17 @@ API.get("/", async (req: Request, res: Response) => {
             orderBy: {
                 creado: "desc",
             },
+            select: {
+                creado: true,
+                materia: true,
+                id: true,
+                docente: {
+                    select:
+                    {
+                        name: true
+                    }
+                }
+            }
         })
 
         if (resultados.length === 0) {

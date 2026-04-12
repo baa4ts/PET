@@ -11,6 +11,7 @@ import promise from 'eslint-plugin-promise'
 import unusedImports from 'eslint-plugin-unused-imports'
 import sonarjs from 'eslint-plugin-sonarjs'
 import noSecrets from 'eslint-plugin-no-secrets'
+import pluginQuery from '@tanstack/eslint-plugin-query'
 
 export default defineConfig([
   globalIgnores(['dist', 'src/components/ui']),
@@ -30,6 +31,7 @@ export default defineConfig([
       unicorn.configs.recommended,
       promise.configs['flat/recommended'],
       sonarjs.configs.recommended,
+      ...pluginQuery.configs['flat/recommended'],
     ],
     rules: {
       'simple-import-sort/imports': 'warn',
