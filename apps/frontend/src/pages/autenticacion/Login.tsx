@@ -1,109 +1,112 @@
-import { useForm } from "@tanstack/react-form";
-import { validarCedula } from "../../helpers/validarCedula";
-import { validarPassword } from "../../helpers/validarPassword";
-import { Link } from "react-router";
-import { useState } from "react";
-import { ActionLogin } from "../../actions/autenticacion/Login.action";
-import { useStoreUsuario } from "../../store/Usuario.store";
+import { useForm } from '@tanstack/react-form'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { validateEmail } from '@/helpers/validatos/validateEmail'
+import { Client } from '@/providers/Client.provider'
 
 export const Login = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isError, setError] = useState<string>("");
-  const { save } = useStoreUsuario()
 
-  const Formulario = useForm({
-    defaultValues: {
-      cedula: "",
-      password: ""
-    },
-    onSubmit: async ({ value }) => {
-      setIsLoading(true);
+    const navigate = useNavigate()
+    const [loading, setLoading] = useState<boolean>(false);
 
-      const response = await ActionLogin(value);
+    const Formulario = useForm({
+        defaultValues: {
+            email: "",
+            password: ""
+        },
 
-      if (!response.ok) {
-        setError(response.message);
-        setIsLoading(false);
-        return;
-      }
+        onSubmit: async ({ value }) => {
+            setLoading(true);
 
-      save(response.datos.token, response.datos.permisos);
-      setIsLoading(false);
-    }
-  })
+            try {
+                const { error } = await Client.signIn.email(value);
 
-  return (
-    <section className="w-full h-full flex flex-col items-center justify-center">
+                if (error) return;
 
-      <form
-        onSubmit={(e) => (e.preventDefault(), Formulario.handleSubmit())}
-        className="w-96 p-5 flex flex-col gap-2 border-2 font-mono"
-      >
+                navigate("/usuario");
+            } finally {
+                setLoading(false);
+            }
+        }
+    })
 
-        <div className="h-20 flex items-center justify-center">
-          <h1 className="text-3xl font-mono">Login</h1>
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-blue-600">
+            <form
+                className="w-full max-w-sm px-6 py-8 border bg-card shadow-sm flex flex-col gap-5"
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    Formulario.handleSubmit()
+                }}
+            >
+
+                <h2>polotecno.melo - Login</h2>
+
+                {/* EMAIL */}
+                <Formulario.Field name='email' validators={{ onBlur: validateEmail, onSubmit: validateEmail }}>
+                    {(F) => (
+                        <Field>
+                            <FieldLabel htmlFor="email">Email</FieldLabel>
+                            <Input
+                                autoComplete="email"
+                                disabled={loading}
+                                id="email"
+                                onBlur={F.handleBlur}
+                                onChange={(e) => F.handleChange(e.target.value)}
+                                placeholder="usuario@email.com"
+                                type="email"
+                                value={F.state.value}
+                            />
+                            <FieldDescription style={{ color: F.state.meta.errors?.[0] ? 'red' : undefined }}>
+                                {F.state.meta.errors?.[0] ?? 'Ingresa tu correo.'}
+                            </FieldDescription>
+                        </Field>
+                    )}
+                </Formulario.Field>
+
+                {/* PASSWORD */}
+                <Formulario.Field name='password'>
+                    {(F) => (
+                        <Field>
+                            <FieldLabel htmlFor="password">Contraseña</FieldLabel>
+                            <Input
+                                autoComplete="current-password"
+                                disabled={loading}
+                                id="password"
+                                onBlur={F.handleBlur}
+                                onChange={(e) => F.handleChange(e.target.value)}
+                                placeholder="******"
+                                type="password"
+                                value={F.state.value}
+                            />
+                            <FieldDescription>Ingresa tu contrasena.</FieldDescription>
+                        </Field>
+                    )}
+                </Formulario.Field>
+
+                <button
+                    className="bg-black text-white py-2 rounded flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={loading}
+                    type="submit"
+                >
+                    {loading && (
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    )}
+                    Iniciar sesion
+                </button>
+
+                {/* Link a registro */}
+                <p className="text-sm text-center">
+                    No tienes cuenta?{" "}
+                    <Link className="text-blue-800 underline" to="/autenticacion/register">
+                        Registrate
+                    </Link>
+                </p>
+
+            </form>
         </div>
-
-        {/* Input para la cedula */}
-        <Formulario.Field name="cedula" validators={{ onChange: validarCedula, onSubmit: validarCedula }}>
-          {(field) => (
-            <div className="flex flex-col gap-1">
-              <input
-                type="text"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Cedula"
-                disabled={isLoading}
-                className="w-full h-12 p-2 border-2 border-gray-600 disabled:opacity-50"
-              />
-              {field.state.meta.errors?.[0] && (
-                <span className="font-mono text-xs text-red-500">{field.state.meta.errors[0]}</span>
-              )}
-            </div>
-          )}
-        </Formulario.Field>
-
-        {/* Input para la contrasenia */}
-        <Formulario.Field name="password" validators={{ onChange: validarPassword, onSubmit: validarPassword }}>
-          {(field) => (
-            <div className="flex flex-col gap-1">
-              <input
-                type="password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Contrasena"
-                disabled={isLoading}
-                className="w-full h-12 p-2 border-2 border-gray-600 disabled:opacity-50"
-              />
-              {field.state.meta.errors?.[0] && (
-                <span className="font-mono text-xs text-red-500">{field.state.meta.errors[0]}</span>
-              )}
-            </div>
-          )}
-        </Formulario.Field>
-
-        {isError && (
-          <div className="w-full h-12 border-2 font-mono p-2 flex items-center justify-center">
-            <span className="font-mono text-xs text-red-500">{isError}</span>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          onClick={() => navigator.vibrate?.(50)}
-          className="w-full h-12 border-2 font-mono cursor-pointer
-                     hover:bg-gray-100 active:bg-gray-200 transition-colors
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? "Cargando..." : "Login"}
-        </button>
-
-        <Link to={{ pathname: "/register" }} className="text-center">
-          <p>No tenes cuenta? Registrate</p>
-        </Link>
-
-      </form>
-    </section>
-  )
+    )
 }
