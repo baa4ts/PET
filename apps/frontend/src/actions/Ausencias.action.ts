@@ -1,8 +1,8 @@
-import axios from "axios";
-
 import type { Ausencia, AusenciasResponse } from "@/types/AusenciasResponse";
 
+import { API } from "../configuracion/API.config";
+
 export const getAusencias = async (): Promise<Ausencia[]> => {
-    const { data } = await axios.get<AusenciasResponse>("http://localhost:3000/api/ausencias");
+    const { data } = await API.get<AusenciasResponse>("/ausencias");
     return data.ausencias;
 };
