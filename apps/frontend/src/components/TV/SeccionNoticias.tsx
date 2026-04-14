@@ -45,11 +45,11 @@ export const SeccionNoticias = () => {
   }, [avanzar, noticias.length]);
 
   return (
-    <article className="flex-4 p-4 min-h-0">
+    <article className="flex-4 min-h-0 border-8 border-blue-700/35 border-double rounded m-4">
 
       {/* Si hay error se muestra */}
       {isError && (
-        <div className="w-full h-full flex items-center justify-center gap-2 rounded bg-zinc-900">
+        <div className="w-full h-full flex items-center justify-center gap-2 bg-zinc-900">
           <WifiSlash className="text-red-400" size={18} />
           <p className="text-sm text-red-400">Error al cargar noticias</p>
         </div>
@@ -57,7 +57,7 @@ export const SeccionNoticias = () => {
 
       {/* Si no hay noticias */}
       {!isError && noticias.length === 0 && (
-        <div className="w-full h-full flex flex-col items-center justify-center rounded bg-zinc-900">
+        <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900">
           <XIcon size={32} className="text-zinc-500" />
           <p className="text-zinc-500 text-sm">No hay noticias</p>
         </div>
@@ -65,7 +65,7 @@ export const SeccionNoticias = () => {
 
       {/* Si hay noticias */}
       {!isError && noticias[actual] && (
-        <div className="w-full h-full overflow-hidden bg-zinc-900 rounded relative">
+        <div className="w-full h-full overflow-hidden bg-zinc-900 relative">
           <img
             alt=""
             className="w-full h-full object-contain"

@@ -45,7 +45,7 @@ export const SeccionEventos = () => {
     }, [avanzar, eventos.length]);
 
     return (
-        <article className="flex-1 bg-white rounded-sm shadow-sm flex flex-col overflow-hidden relative">
+        <article className="flex-1 bg-white rounded-sm shadow-sm flex flex-col outline-2 outline-dashed outline-teal-400/80 to-border overflow-hidden relative">
             <div className="font-semibold text-lg py-2 px-3 border-b border-gray-200 shrink-0">
                 Proximo evento
             </div>
