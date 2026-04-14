@@ -1,13 +1,13 @@
-export interface AusenciasResponse {
-    mensaje:   string;
-    ausencias: Ausencia[];
-}
-
 export interface Ausencia {
     creado:  Date;
-    materia: string;
-    id:      number;
     docente: Docente;
+    id:      number;
+    materia: string;
+}
+
+export interface AusenciasResponse {
+    ausencias: Ausencia[];
+    mensaje:   string;
 }
 
 export interface Docente {

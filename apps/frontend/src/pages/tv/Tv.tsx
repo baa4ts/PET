@@ -13,10 +13,8 @@ export const Tv = () => {
 
             {/* Panel derecho */}
             <section className="w-2/6 flex flex-col p-4 gap-3 h-full">
-
                 <SeccionAusencias />
                 <SeccionEventos />
-
             </section>
         </section>
     );
