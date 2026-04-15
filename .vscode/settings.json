@@ -1,9 +1,8 @@
 {
   // — Telemetría —
-  "telemetry.telemetryLevel": "off",              // cubre todo: crash + usage
+  "telemetry.telemetryLevel": "off", // cubre todo: crash + usage
   // telemetry.enableTelemetry y telemetry.enableCrashReporter → ELIMINADOS (deprecados desde v1.61)
   "telemetry.feedback.enabled": false,
-
   // — Copilot —
   "github.copilot.enable": {
     "*": false
@@ -11,30 +10,27 @@
   // github.copilot.editor.enableAutoCompletions → ELIMINADO (no existe; cubierto por .enable arriba)
   "github.copilot.editor.enableCodeActions": false,
   // github.copilot.editor.statusBarItem.enabled → ELIMINADO (no existe en la referencia oficial)
-
   // — Chat / panel IA —
-  "chat.disableAIFeatures": true,                 // ← reemplaza el inexistente "chat.enabled"
-  "chat.commandCenter.enabled": false,            // oculta el ícono Chat del title bar
+  "chat.disableAIFeatures": true, // ← reemplaza el inexistente "chat.enabled"
+  "chat.commandCenter.enabled": false, // oculta el ícono Chat del title bar
   "chat.agent.enabled": false,
   "chat.checkpoints.enabled": false,
   "chat.agent.maxRequests": 0,
-  "chat.agentsControl.enabled": "hidden",            // era "hidden" → valor correcto: booleano
+  "chat.agentsControl.enabled": "hidden", // era "hidden" → valor correcto: booleano
   // chat.customAgentInSubagent.enabled → ELIMINADO (no existe en docs oficiales)
   // chat.agentSessionProjection.enabled  → ELIMINADO (ídem)
-
   // — Inline Chat —
   "inlineChat.enabled": false,
   // inlineChat.askInChat → ELIMINADO (no existe)
-
   // — IntelliCode —
   "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
   "editor.suggestSelection": "first",
-
   // — Experimentos / red —
   "workbench.enableExperiments": false,
   "workbench.settings.enableNaturalLanguageSearch": false,
   "extensions.ignoreRecommendations": true,
   "update.mode": "none",
   "update.showReleaseNotes": false,
-  "npm.fetchOnlinePackageInfo": false
+  "npm.fetchOnlinePackageInfo": false,
+  "task.allowAutomaticTasks": "on"
 }
