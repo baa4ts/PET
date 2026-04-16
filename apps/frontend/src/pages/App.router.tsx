@@ -1,16 +1,20 @@
+import { CircleNotch } from "@phosphor-icons/react";
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, redirect } from "react-router";
-import { CircleNotch } from "@phosphor-icons/react";
 
 import { requireGuest } from "../loaders/requireGuest";
 import { requireSession } from "../loaders/requireSession";
-import { Home } from "./home/Home";
 import { Dashboard } from "./dashboard/Dashboard";
+import { Home } from "./home/Home";
 
 const Tv = lazy(() => import("./tv/Tv").then(m => ({ default: m.Tv })));
 const Login = lazy(() => import("./autenticacion/Login").then(m => ({ default: m.Login })));
 const Register = lazy(() => import("./autenticacion/Register").then(m => ({ default: m.Register })));
 const Perfil = lazy(() => import("./usuario/Perfil").then(m => ({ default: m.Perfil })));
+
+function Lazy({ children }: { children: React.ReactNode }) {
+    return <Suspense fallback={<PageSpinner />}>{children}</Suspense>;
+}
 
 function PageSpinner() {
     return (
@@ -18,10 +22,6 @@ function PageSpinner() {
             <CircleNotch className="h-16 w-16 animate-spin text-primary" />
         </div>
     );
-}
-
-function Lazy({ children }: { children: React.ReactNode }) {
-    return <Suspense fallback={<PageSpinner />}>{children}</Suspense>;
 }
 
 const AppRouter = createBrowserRouter([
@@ -73,6 +73,7 @@ const AppRouter = createBrowserRouter([
     {
         path: "/dashboard",
         element: <Dashboard />,
+        loader: requireSession,
         children: [
             {
                 index: true,

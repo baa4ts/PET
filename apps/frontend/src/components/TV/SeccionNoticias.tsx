@@ -58,7 +58,7 @@ export const SeccionNoticias = () => {
       {/* Si no hay noticias */}
       {!isError && noticias.length === 0 && (
         <div className="w-full h-full flex flex-col items-center justify-center rounded bg-zinc-900">
-          <XIcon size={32} className="text-zinc-500" />
+          <XIcon className="text-zinc-500" size={32} />
           <p className="text-zinc-500 text-sm">No hay noticias</p>
         </div>
       )}

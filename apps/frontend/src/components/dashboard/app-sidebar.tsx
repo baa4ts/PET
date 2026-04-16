@@ -1,23 +1,23 @@
 import {
+    BookOpenTextIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    UserIcon,
+    UsersThreeIcon} from "@phosphor-icons/react"
+import { Link } from "react-router"
+
+import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
+    SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarHeader,
 } from "@/components/ui/sidebar"
-import {
-    BookOpenTextIcon,
-    CalendarIcon,
-    UsersThreeIcon,
-    ChartBarIcon,
-    UserIcon
-} from "@phosphor-icons/react"
-import { Link } from "react-router"
 
 export function AppSidebar() {
     return (
