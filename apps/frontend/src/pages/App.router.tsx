@@ -72,8 +72,8 @@ const AppRouter = createBrowserRouter([
     },
     {
         path: "/dashboard",
-        element: <Dashboard />,
         loader: requireSession,
+        element: <Dashboard />,
         children: [
             {
                 index: true,
