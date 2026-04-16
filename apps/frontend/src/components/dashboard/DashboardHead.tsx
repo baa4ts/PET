@@ -88,6 +88,19 @@ export const DashboardHead = () => {
                                         {session.user.email}
                                     </p>
                                 )}
+                                {/* Permisos */}
+                                {session?.user.permisos && Object.keys(session.user.permisos).length > 0 && (
+                                    <div className="mt-1 flex flex-wrap gap-1">
+                                        {Object.keys(session.user.permisos).map(modulo => (
+                                            <span
+                                                key={modulo}
+                                                className="text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5"
+                                            >
+                                                {modulo}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             <DropdownMenuSeparator />

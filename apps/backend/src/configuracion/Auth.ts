@@ -1,15 +1,16 @@
 import { betterAuth } from "better-auth"
 import { prismaAdapter } from "better-auth/adapters/prisma"
-// Plugins
-import { admin, openAPI } from "better-auth/plugins"
-
+import { openAPI, customSession } from "better-auth/plugins"
 import { prisma } from "./Prisma"
-import { accessControl, AdminRole, ausenciasRole, eventosRole, noticiasRole } from "./Roles"
+
+export interface Permisos {
+    [key: string]: string[]
+}
 
 /**
- * Gestor de autenticación
+ * Gestor de autenticacion
  */
-const auth = betterAuth({
+export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: "sqlite",
     }),
@@ -17,26 +18,47 @@ const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+
+    user: {
+        additionalFields: {
+            // Campo para los permisos
+            permisos: {
+                type: "string",
+                required: false,
+                input: true,
+                defaultValue: "{}"
+            },
+        },
+    },
     plugins: [
-
-        /**
-         * Control mediante roles
-         */
-        admin({
-            ac: accessControl,
-            roles: {
-                root: AdminRole,
-                noticias: noticiasRole,
-                ausencias: ausenciasRole,
-                eventos: eventosRole,
-            }
-        }),
-
-
         /**
          * Documentacion
          */
         openAPI(),
+
+        /**
+         * Retorno de los permisos
+         */
+        customSession(async ({ user, session }) => {
+            let permisosParsed: Permisos = {}
+
+            try {
+                // Validacion de existencia antes de parsear
+                permisosParsed = user && "permisos" in user && user.permisos
+                    ? JSON.parse(user.permisos as string)
+                    : {};
+            } catch (error) {
+                permisosParsed = {}
+            }
+
+            return {
+                user: {
+                    ...user,
+                    permisos: permisosParsed
+                },
+                session
+            }
+        }),
     ],
 
     /**
@@ -51,5 +73,3 @@ const auth = betterAuth({
         disableCSRFCheck: true, // solo para desarrollo
     },
 })
-
-export { auth }

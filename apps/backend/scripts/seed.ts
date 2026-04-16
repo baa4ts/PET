@@ -7,262 +7,275 @@ import path from "node:path"
 import { auth } from "../src/configuracion/Auth"
 import { prisma } from "../src/configuracion/Prisma"
 
-const BASE_URL = "http://localhost:3000/api"
+const BASE_URL     = "http://localhost:3000/api"
 const BASE_URL_AUTH = "http://localhost:3000"
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Permisos ────────────────────────────────────────────────────────────────
+
+type Permisos = Record<string, string[]>
+
+const ACCIONES = ["ver", "crear", "editar", "eliminar"] as const
+
+const PERMISOS: Record<string, Permisos> = {
+    root: {
+        noticias:  [...ACCIONES],
+        ausencias: [...ACCIONES],
+        eventos:   [...ACCIONES],
+    },
+    noticias: {
+        noticias: [...ACCIONES],
+    },
+    ausencias: {
+        ausencias: [...ACCIONES],
+    },
+    eventos: {
+        eventos: [...ACCIONES],
+    },
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function Home(relative: string, create = false): string {
-  const full = path.join(process.cwd(), relative)
-  if (create && !fs.existsSync(full)) fs.mkdirSync(full, { recursive: true })
-  return full
+    const full = path.join(process.cwd(), relative)
+    if (create && !fs.existsSync(full)) fs.mkdirSync(full, { recursive: true })
+    return full
 }
 
-async function crearUsuario(name: string, email: string, password: string, role?: string) {
-  await auth.api.signUpEmail({ body: { name, email, password } })
-  if (role) {
-    await prisma.user.update({ where: { email }, data: { role } })
-  }
-  return await prisma.user.findUnique({ where: { email } })
+async function crearUsuario(name: string, email: string, password: string, permisos?: Permisos) {
+    await auth.api.signUpEmail({ body: { name, email, password } })
+
+    if (permisos) {
+        await prisma.user.update({
+            where: { email },
+            data: { permisos: JSON.stringify(permisos) },
+        })
+    }
+
+    return await prisma.user.findUnique({ where: { email } })
 }
 
-/** Login via HTTP y retorna la cookie de sesion */
 async function loginHTTP(email: string, password: string): Promise<string> {
-  const res = await fetch(`${BASE_URL_AUTH}/api/auth/sign-in/email`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  })
-
-  const setCookie = res.headers.get("set-cookie")
-  if (!setCookie) {
-    const texto = await res.text()
-    throw new Error(`Login fallido para ${email} — ${res.status}: ${texto}`)
-  }
-
-  return setCookie.split(",").map(c => c.split(";")[0].trim()).join("; ")
-}
-
-/** Publica una noticia via HTTP con multipart/form-data */
-async function publicarNoticiaHTTP(
-  cookie: string,
-  titulo: string,
-  descripcion: string,
-  imagenPath?: string,
-  fechaOverride?: Date
-) {
-  const form = new FormData()
-  form.append("titulo", titulo)
-  form.append("descripcion", descripcion)
-
-  if (imagenPath && fs.existsSync(imagenPath)) {
-    const buffer = fs.readFileSync(imagenPath)
-    const blob = new Blob([buffer], { type: "image/png" })
-    form.append("recursos", blob, path.basename(imagenPath))
-  }
-
-  const res = await fetch(`${BASE_URL}/noticias`, {
-    method: "POST",
-    headers: {
-      "Cookie": cookie,
-      "Origin": "http://localhost:3000"
-    },
-    body: form,
-  })
-
-  const json = await res.json() as { mensaje: string, noticias: { id: number }[] }
-
-  // Sobreescribir fecha en db para simular noticias vencidas o con delay
-  if (fechaOverride && json.noticias?.[0]?.id) {
-    await prisma.noticia.update({
-      where: { id: json.noticias[0].id },
-      data: { publicado: fechaOverride }
+    const res = await fetch(`${BASE_URL_AUTH}/api/auth/sign-in/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
     })
-  }
 
-  return json
+    const setCookie = res.headers.get("set-cookie")
+    if (!setCookie) {
+        const texto = await res.text()
+        throw new Error(`Login fallido para ${email} — ${res.status}: ${texto}`)
+    }
+
+    return setCookie.split(",").map(c => c.split(";")[0].trim()).join("; ")
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────────
+async function publicarNoticiaHTTP(
+    cookie: string,
+    titulo: string,
+    descripcion: string,
+    imagenPath?: string,
+    fechaOverride?: Date
+) {
+    const form = new FormData()
+    form.append("titulo", titulo)
+    form.append("descripcion", descripcion)
+
+    if (imagenPath && fs.existsSync(imagenPath)) {
+        const buffer = fs.readFileSync(imagenPath)
+        const blob = new Blob([buffer], { type: "image/png" })
+        form.append("recursos", blob, path.basename(imagenPath))
+    }
+
+    const res = await fetch(`${BASE_URL}/noticias`, {
+        method: "POST",
+        headers: { "Cookie": cookie, "Origin": "http://localhost:3000" },
+        body: form,
+    })
+
+    const json = await res.json() as { mensaje: string, noticias: { id: number }[] }
+
+    if (fechaOverride && json.noticias?.[0]?.id) {
+        await prisma.noticia.update({
+            where: { id: json.noticias[0].id },
+            data: { publicado: fechaOverride },
+        })
+    }
+
+    return json
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
 
-  console.log("🗑️  Limpiando base de datos...")
+    // ── Limpieza ──────────────────────────────────────────────────────────────
 
-  await prisma.recurso.deleteMany()
-  await prisma.noticia.deleteMany()
-  await prisma.ausencia.deleteMany()
-  await prisma.eventos.deleteMany()
-  await prisma.session.deleteMany()
-  await prisma.account.deleteMany()
-  await prisma.user.deleteMany()
+    console.log("🗑️  Limpiando base de datos...")
+    await prisma.recurso.deleteMany()
+    await prisma.noticia.deleteMany()
+    await prisma.ausencia.deleteMany()
+    await prisma.eventos.deleteMany()
+    await prisma.session.deleteMany()
+    await prisma.account.deleteMany()
+    await prisma.user.deleteMany()
+    console.log("✅ Base de datos limpia\n")
 
-  console.log("✅ Base de datos limpia\n")
+    // ── Recursos estáticos ────────────────────────────────────────────────────
 
-  // ─── Crear carpeta de estaticos ──────────────────────────────────────────
+    const carpetaRecursos = Home(process.env.STATIC!, true)
+    console.log(`📁 Carpeta de recursos: ${carpetaRecursos}\n`)
 
-  const carpetaRecursos = Home(process.env.STATIC!, true)
-  console.log(`📁 Carpeta de recursos: ${carpetaRecursos}\n`)
+    // ── Imágenes ──────────────────────────────────────────────────────────────
 
-  // ─── Detectar imagenes desde scripts/ ───────────────────────────────────
+    console.log("🖼️  Detectando imagenes...")
 
-  console.log("🖼️  Detectando imagenes...")
+    const carpetaScripts = path.join(process.cwd(), "scripts")
+    const imagenesDisponibles = fs
+        .readdirSync(carpetaScripts)
+        .filter(f => /^\d+\.png$/i.test(f))
+        .sort((a, b) => parseInt(a) - parseInt(b))
 
-  const imagenesDisponibles: string[] = []
-  const carpetaScripts = path.join(process.cwd(), "scripts")
-
-  for (const archivo of fs.readdirSync(carpetaScripts)) {
-    if (/^\d+\.png$/i.test(archivo)) {
-      imagenesDisponibles.push(archivo)
-      console.log(`  ✅ ${archivo} encontrada`)
+    if (imagenesDisponibles.length === 0) {
+        console.warn("  ⚠️  No se encontraron imagenes (1.png - N.png)\n")
+    } else {
+        imagenesDisponibles.forEach(f => console.log(`  ✅ ${f} encontrada`))
+        console.log(`  📦 ${imagenesDisponibles.length} imagenes disponibles\n`)
     }
-  }
 
-  if (imagenesDisponibles.length === 0) {
-    console.warn("  ⚠️  No se encontraron imagenes (1.png - N.png)\n")
-  } else {
-    imagenesDisponibles.sort((a, b) => parseInt(a) - parseInt(b))
-    console.log(`  📦 ${imagenesDisponibles.length} imagenes disponibles\n`)
-  }
+    // ── Usuarios ──────────────────────────────────────────────────────────────
 
-  // ─── Usuarios ────────────────────────────────────────────────────────────
+    console.log("👤 Creando usuarios...")
 
-  console.log("👤 Creando usuarios...")
+    await crearUsuario("Admin Root", "root@admin.com", "abc123456", PERMISOS.root)
+    console.log("  ✅ root@admin.com — permisos: root")
 
-  await crearUsuario("Admin Root", "root@admin.com", "abc123456", "root")
-  console.log("  ✅ root@admin.com — rol: root")
+    type Usuario = NonNullable<Awaited<ReturnType<typeof crearUsuario>>>
 
-  const usuariosNoticias: NonNullable<Awaited<ReturnType<typeof crearUsuario>>>[] = []
-  for (let i = 1; i <= 5; i++) {
-    const u = await crearUsuario(`Editor Noticias ${i}`, `noticias${i}@admin.com`, "abc123456", "noticias")
-    usuariosNoticias.push(u!)
-    console.log(`  ✅ noticias${i}@admin.com — rol: noticias`)
-  }
+    const usuariosNoticias: Usuario[] = []
+    for (let i = 1; i <= 5; i++) {
+        const u = await crearUsuario(`Editor Noticias ${i}`, `noticias${i}@admin.com`, "abc123456", PERMISOS.noticias)
+        usuariosNoticias.push(u!)
+        console.log(`  ✅ noticias${i}@admin.com — permisos: noticias`)
+    }
 
-  const usuariosAusencias: NonNullable<Awaited<ReturnType<typeof crearUsuario>>>[] = []
-  for (let i = 1; i <= 5; i++) {
-    const u = await crearUsuario(`Editor Ausencias ${i}`, `ausencias${i}@admin.com`, "abc123456", "ausencias")
-    usuariosAusencias.push(u!)
-    console.log(`  ✅ ausencias${i}@admin.com — rol: ausencias`)
-  }
+    const usuariosAusencias: Usuario[] = []
+    for (let i = 1; i <= 5; i++) {
+        const u = await crearUsuario(`Editor Ausencias ${i}`, `ausencias${i}@admin.com`, "abc123456", PERMISOS.ausencias)
+        usuariosAusencias.push(u!)
+        console.log(`  ✅ ausencias${i}@admin.com — permisos: ausencias`)
+    }
 
-  const usuariosEventos: NonNullable<Awaited<ReturnType<typeof crearUsuario>>>[] = []
-  for (let i = 1; i <= 5; i++) {
-    const u = await crearUsuario(`Editor Eventos ${i}`, `eventos${i}@admin.com`, "abc123456", "eventos")
-    usuariosEventos.push(u!)
-    console.log(`  ✅ eventos${i}@admin.com — rol: eventos`)
-  }
+    const usuariosEventos: Usuario[] = []
+    for (let i = 1; i <= 5; i++) {
+        const u = await crearUsuario(`Editor Eventos ${i}`, `eventos${i}@admin.com`, "abc123456", PERMISOS.eventos)
+        usuariosEventos.push(u!)
+        console.log(`  ✅ eventos${i}@admin.com — permisos: eventos`)
+    }
 
-  for (let i = 1; i <= 5; i++) {
-    await crearUsuario(`Usuario ${i}`, `user${i}@user.com`, "abc123456")
-    console.log(`  ✅ user${i}@user.com — rol: ninguno`)
-  }
+    for (let i = 1; i <= 5; i++) {
+        await crearUsuario(`Usuario ${i}`, `user${i}@user.com`, "abc123456")
+        console.log(`  ✅ user${i}@user.com — sin permisos`)
+    }
 
-  console.log()
+    console.log()
 
-  // ─── Login como admin via HTTP ───────────────────────────────────────────
+    // ── Login ─────────────────────────────────────────────────────────────────
 
-  console.log("🔑 Iniciando sesion como root...")
-  const cookie = await loginHTTP("root@admin.com", "abc123456")
-  console.log("  ✅ Sesion iniciada\n")
+    console.log("🔑 Iniciando sesion como root...")
+    const cookie = await loginHTTP("root@admin.com", "abc123456")
+    console.log("  ✅ Sesion iniciada\n")
 
-  // ─── Noticias vencidas (mas de 24 horas) via HTTP ────────────────────────
+    // ── Noticias vencidas ─────────────────────────────────────────────────────
 
-  console.log("📰 Creando noticias vencidas via HTTP...")
+    console.log("📰 Creando noticias vencidas...")
+    for (let i = 1; i <= 5; i++) {
+        const imagen = imagenesDisponibles[(i - 1) % imagenesDisponibles.length]
+        const imagenPath = imagen ? path.join(carpetaScripts, imagen) : undefined
+        const fechaVencida = new Date(Date.now() - (25 + i) * 60 * 60 * 1000)
 
-  for (let i = 1; i <= 5; i++) {
-    const imagen = imagenesDisponibles[(i - 1) % imagenesDisponibles.length]
-    const imagenPath = imagen ? path.join(carpetaScripts, imagen) : undefined
-    const fechaVencida = new Date(Date.now() - (25 + i) * 60 * 60 * 1000)
+        const json = await publicarNoticiaHTTP(
+            cookie,
+            `Noticia vencida ${i}`,
+            `Esta noticia fue publicada hace mas de 24 horas (noticia ${i})`,
+            imagenPath,
+            fechaVencida
+        )
+        console.log(`  ✅ Noticia vencida ${i} — id: ${json.noticias?.[0]?.id}${imagen ? ` — ${imagen}` : ""}`)
+    }
 
-    const json = await publicarNoticiaHTTP(
-      cookie,
-      `Noticia vencida ${i}`,
-      `Esta noticia fue publicada hace mas de 24 horas (noticia ${i})`,
-      imagenPath,
-      fechaVencida
-    )
+    console.log()
 
-    console.log(`  ✅ Noticia vencida ${i} — id: ${json.noticias?.[0]?.id}${imagen ? ` — imagen: ${imagen}` : ""}`)
-  }
+    // ── Noticias recientes ────────────────────────────────────────────────────
 
-  console.log()
+    console.log("📰 Creando noticias recientes...")
+    for (let i = 1; i <= 5; i++) {
+        const imagen = imagenesDisponibles[(i + 4) % imagenesDisponibles.length]
+        const imagenPath = imagen ? path.join(carpetaScripts, imagen) : undefined
+        const fechaReciente = new Date(Date.now() - 2 * 60 * 60 * 1000)
 
-  // ─── Noticias recientes (2 horas atras) via HTTP ─────────────────────────
+        const json = await publicarNoticiaHTTP(
+            cookie,
+            `Noticia reciente ${i}`,
+            `Esta noticia fue publicada hace 2 horas (noticia ${i})`,
+            imagenPath,
+            fechaReciente
+        )
+        console.log(`  ✅ Noticia reciente ${i} — id: ${json.noticias?.[0]?.id}${imagen ? ` — ${imagen}` : ""}`)
+    }
 
-  console.log("📰 Creando noticias recientes via HTTP...")
+    console.log()
 
-  for (let i = 1; i <= 5; i++) {
-    const imagen = imagenesDisponibles[(i + 4) % imagenesDisponibles.length]
-    const imagenPath = imagen ? path.join(carpetaScripts, imagen) : undefined
-    const fechaReciente = new Date(Date.now() - 2 * 60 * 60 * 1000)
+    // ── Ausencias ─────────────────────────────────────────────────────────────
 
-    const json = await publicarNoticiaHTTP(
-      cookie,
-      `Noticia reciente ${i}`,
-      `Esta noticia fue publicada hace 2 horas (noticia ${i})`,
-      imagenPath,
-      fechaReciente
-    )
+    console.log("🏫 Creando ausencias...")
+    const materias = ["Matematica", "Historia", "Biologia", "Fisica", "Literatura"]
 
-    console.log(`  ✅ Noticia reciente ${i} — id: ${json.noticias?.[0]?.id}${imagen ? ` — imagen: ${imagen}` : ""}`)
-  }
+    for (let i = 0; i < 5; i++) {
+        const ausencia = await prisma.ausencia.create({
+            data: {
+                materia: materias[i],
+                docenteId: usuariosNoticias[i].id,
+                publicadorId: usuariosAusencias[i].id,
+            },
+        })
+        console.log(`  ✅ Ausencia ${ausencia.id} — ${materias[i]}`)
+    }
 
-  console.log()
+    console.log()
 
-  // ─── Ausencias ───────────────────────────────────────────────────────────
+    // ── Eventos ───────────────────────────────────────────────────────────────
 
-  console.log("🏫 Creando ausencias...")
+    console.log("📅 Creando eventos...")
+    const eventosData = [
+        { nombre: "Feria de ciencias",    dias: 5,  descripcion: "Exposición de proyectos científicos de los estudiantes" },
+        { nombre: "Olimpiadas escolares", dias: 10, descripcion: "Competencia deportiva entre cursos del instituto" },
+        { nombre: "Acto de graduacion",   dias: 20, descripcion: "Ceremonia de egreso para los estudiantes de último año" },
+        { nombre: "Dia del estudiante",   dias: 30, descripcion: "Celebración y actividades recreativas para todos los alumnos" },
+        { nombre: "Expo proyectos",       dias: 45, descripcion: "Muestra de proyectos finales de las distintas carreras" },
+    ]
 
-  const materias = ["Matematica", "Historia", "Biologia", "Fisica", "Literatura"]
+    for (let i = 0; i < 5; i++) {
+        const fecha = new Date(Date.now() + eventosData[i].dias * 24 * 60 * 60 * 1000)
+        const evento = await prisma.eventos.create({
+            data: {
+                nombre: eventosData[i].nombre,
+                descripcion: eventosData[i].descripcion,
+                fecha,
+                userId: usuariosEventos[i].id,
+            },
+        })
+        console.log(`  ✅ Evento ${evento.id} — ${eventosData[i].nombre}`)
+    }
 
-  for (let i = 0; i < 5; i++) {
-    const ausencia = await prisma.ausencia.create({
-      data: {
-        materia: materias[i],
-        docenteId: usuariosNoticias[i].id,
-        publicadorId: usuariosAusencias[i].id,
-      }
-    })
-    console.log(`  ✅ Ausencia ${ausencia.id} — ${materias[i]}`)
-  }
+    console.log()
+    console.log("🎉 Seed completado")
 
-  console.log()
-
-  // ─── Eventos ─────────────────────────────────────────────────────────────
-
-  console.log("📅 Creando eventos...")
-
-  const eventosData = [
-    { nombre: "Feria de ciencias", dias: 5, descripcion: "Exposición de proyectos científicos de los estudiantes" },
-    { nombre: "Olimpiadas escolares", dias: 10, descripcion: "Competencia deportiva entre cursos del instituto" },
-    { nombre: "Acto de graduacion", dias: 20, descripcion: "Ceremonia de egreso para los estudiantes de último año" },
-    { nombre: "Dia del estudiante", dias: 30, descripcion: "Celebración y actividades recreativas para todos los alumnos" },
-    { nombre: "Expo proyectos", dias: 45, descripcion: "Muestra de proyectos finales de las distintas carreras" },
-  ]
-
-  for (let i = 0; i < 5; i++) {
-    const fecha = new Date(Date.now() + eventosData[i].dias * 24 * 60 * 60 * 1000)
-
-    const evento = await prisma.eventos.create({
-      data: {
-        nombre: eventosData[i].nombre,
-        descripcion: eventosData[i].descripcion,
-        fecha,
-        userId: usuariosEventos[i].id,
-      }
-    })
-    console.log(`  ✅ Evento ${evento.id} — ${eventosData[i].nombre}`)
-  }
-
-  console.log()
-  console.log("🎉 Seed completado")
-
-  await prisma.$disconnect()
+    await prisma.$disconnect()
 }
 
 main().catch((e) => {
-  console.error(e)
-  prisma.$disconnect()
-  process.exit(1)
+    console.error(e)
+    prisma.$disconnect()
+    process.exit(1)
 })
