@@ -8,7 +8,7 @@ call pnpm approve-builds --all
 
 :: Migraciones
 call pnpm prisma generate
-call pnpm prisma migrate deploy
+call pnpm prisma migrate dev --name init
 
 :: Iniciar el servidor backend
 start "Backend" cmd /k "pnpm run dev"
