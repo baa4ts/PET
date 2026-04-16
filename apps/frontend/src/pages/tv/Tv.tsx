@@ -6,7 +6,7 @@ export const Tv = () => {
 
 
     return (
-        <section className="w-screen h-screen flex flex-col md:flex-row overflow-hidden bg-radial-[at_25%_25%] from-yellow-100 to-sky-400 to-95%">
+        <section className="w-screen h-screen flex flex-col md:flex-row overflow-hidden bg-linear-to-tl from-indigo-900 via-blue-400 to-slate-200">
 
             {/* Noticias */}
             <SeccionNoticias />

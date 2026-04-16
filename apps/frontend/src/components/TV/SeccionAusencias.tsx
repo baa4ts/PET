@@ -17,7 +17,7 @@ export const SeccionAusencias = () => {
   const activo = ausencias.length > 2;
 
   return (
-    <article className="flex-1 bg-white rounded shadow-sm outline-2 outline-dashed outline-indigo-400/80 flex flex-col overflow-hidden">
+    <article className="flex-1 bg-white rounded shadow-sm outline-1  outline-amber-300/80 flex flex-col overflow-hidden">
       <div className="text-lg font-semibold py-2 px-3 border-b border-gray-200">
         Ausencias
       </div>
