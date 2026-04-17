@@ -14,6 +14,8 @@ tags:
     description: Endpoints de ausencias
   - name: Noticias
     description: Endpoints de noticias
+  - name: Estadisticas
+    description: Endpoints de estadisticas
 
 components:
   schemas:
@@ -99,6 +101,19 @@ components:
           items:
             $ref: "#/components/schemas/Recurso"
 
+    Estadisticas:
+      type: object
+      properties:
+        eventos:
+          type: integer
+          example: 5
+        noticias:
+          type: integer
+          example: 12
+        ausencias:
+          type: integer
+          example: 3
+
   responses:
     NoAutorizado:
       description: Sin sesion activa
@@ -155,7 +170,21 @@ paths:
     get:
       tags: [Eventos]
       summary: Obtener eventos proximos
-      description: Retorna todos los eventos que no hayan vencido aun, ordenados por fecha ascendente.
+      description: Retorna todos los eventos cuya fecha no haya vencido aun, ordenados por fecha ascendente.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Cantidad maxima de resultados a retornar.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Cantidad de resultados a saltar.
       responses:
         "200":
           description: OK o sin resultados
@@ -239,8 +268,22 @@ paths:
   /ausencias:
     get:
       tags: [Ausencias]
-      summary: Obtener ausencias
-      description: Retorna todas las ausencias ordenadas por fecha descendente.
+      summary: Obtener ausencias de hoy
+      description: Retorna todas las ausencias del dia actual, ordenadas por fecha descendente.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Cantidad maxima de resultados a retornar.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Cantidad de resultados a saltar.
       responses:
         "200":
           description: OK o sin resultados
@@ -322,6 +365,20 @@ paths:
       tags: [Noticias]
       summary: Obtener noticias recientes
       description: Retorna todas las noticias publicadas en las ultimas 24 horas, ordenadas por fecha descendente.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          required: false
+          description: Cantidad maxima de resultados a retornar.
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+          required: false
+          description: Cantidad de resultados a saltar.
       responses:
         "200":
           description: OK o sin resultados
@@ -364,7 +421,7 @@ paths:
     post:
       tags: [Noticias]
       summary: Crear noticia
-      description: Middlewares `requiereAuth` `requierePermiso("noticias", "crear")`. Acepta hasta 5 archivos en el campo `recursos`.
+      description: Middlewares `requiereAuth` `requierePermiso("noticias", "crear")`. Acepta hasta 5 archivos en el campo `recursos` (jpg, jpeg, png, webp, pdf — max 10MB por archivo).
       requestBody:
         required: true
         content:
@@ -405,5 +462,34 @@ paths:
           $ref: "#/components/responses/NoAutorizado"
         "403":
           $ref: "#/components/responses/SinPermisos"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+
+  /estadisticas:
+    get:
+      tags: [Estadisticas]
+      summary: Obtener estadisticas globales
+      description: Retorna el conteo total de eventos, noticias y ausencias. Middleware `requiereAuth`.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: OK
+                  estadisticas:
+                    $ref: "#/components/schemas/Estadisticas"
+              example:
+                mensaje: OK
+                estadisticas:
+                  eventos: 5
+                  noticias: 12
+                  ausencias: 3
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
         "500":
           $ref: "#/components/responses/ErrorServidor"
