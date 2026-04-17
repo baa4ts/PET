@@ -4,6 +4,7 @@ import { prisma } from "@/configuracion/Prisma";
 import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { EventoSchema } from "./Eventos.scheme";
+import { parsePagination } from "@/Helpers/ParsePagination";
 
 /**
  *
@@ -15,6 +16,7 @@ const API = Router();
 
 API.get("/", async (req: Request, res: Response) => {
     try {
+        const { limit, offset } = parsePagination(req.query)
 
         const resultados = await prisma.eventos.findMany({
             // Filtrar por los eventos que no hayan vencido aun
@@ -30,7 +32,9 @@ API.get("/", async (req: Request, res: Response) => {
             },
             omit: {
                 userId: true
-            }
+            },
+            take: limit,
+            skip: offset
         })
 
         if (resultados.length === 0) {
@@ -45,7 +49,7 @@ API.get("/", async (req: Request, res: Response) => {
 })
 
 
-API.post("/", requiereAuth, requierePermiso("eventos", "crear"), async (req: Request, res: Response) => {
+API.post("/", requierePermiso("eventos", "crear"), async (req: Request, res: Response) => {
 
     const resp = EventoSchema.safeParse(req.body)
 

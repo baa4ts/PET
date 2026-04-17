@@ -5,6 +5,7 @@ import { Archivos } from "@/middlewares/Archivos.middleware";
 import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { NoticiaSchema } from "./Noticias.scheme";
+import { parsePagination } from "@/Helpers/ParsePagination";
 
 /**
  *
@@ -16,6 +17,9 @@ const API = Router();
 
 API.get("/", async (req: Request, res: Response) => {
     try {
+
+        const { limit, offset } = parsePagination(req.query)
+
         const resultados = await prisma.noticia.findMany({
             where: {
                 publicado: {
@@ -31,7 +35,9 @@ API.get("/", async (req: Request, res: Response) => {
             },
             omit: {
                 userId: true
-            }
+            },
+            take: limit,
+            skip: offset
         })
 
         if (resultados.length === 0) {
@@ -49,7 +55,6 @@ API.get("/", async (req: Request, res: Response) => {
 API.post("/",
 
     /** Middlewares */
-    requiereAuth,
     requierePermiso("noticias", "crear"),
 
     Archivos({

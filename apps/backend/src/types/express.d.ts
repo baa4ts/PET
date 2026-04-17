@@ -1,4 +1,5 @@
 import { Session } from "better-auth"
+import { Permisos } from "@/configuracion/Auth"
 
 declare global {
     namespace Express {
@@ -11,10 +12,7 @@ declare global {
                 image?: string | null
                 createdAt: Date
                 updatedAt: Date
-                role?: string | null
-                banned?: boolean | null
-                banReason?: string | null
-                banExpires?: Date | null
+                permisos: Permisos
             }
             session?: Session
         }

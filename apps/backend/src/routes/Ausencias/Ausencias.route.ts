@@ -4,6 +4,7 @@ import { prisma } from "@/configuracion/Prisma";
 import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { AusenciaSchema } from "./Ausencias.scheme";
+import { parsePagination } from "@/Helpers/ParsePagination";
 
 /**
  *
@@ -32,7 +33,14 @@ const API = Router();
 API.get("/", async (req: Request, res: Response) => {
     try {
 
+        const { limit, offset } = parsePagination(req.query)
+
         const resultados = await prisma.ausencia.findMany({
+            where: {
+                creado: {
+                    gte: new Date(new Date().setHours(0, 0, 0, 0))
+                }
+            },
             orderBy: {
                 creado: "desc",
             },
@@ -46,7 +54,9 @@ API.get("/", async (req: Request, res: Response) => {
                         name: true
                     }
                 }
-            }
+            },
+            take: limit,
+            skip: offset,
         })
 
         if (resultados.length === 0) {
@@ -61,7 +71,7 @@ API.get("/", async (req: Request, res: Response) => {
 })
 
 
-API.post("/", requiereAuth, requierePermiso("ausencias", "crear"), async (req: Request, res: Response) => {
+API.post("/", requierePermiso("ausencias", "crear"), async (req: Request, res: Response) => {
 
     const resp = AusenciaSchema.safeParse(req.body)
 
