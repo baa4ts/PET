@@ -1,8 +1,8 @@
-import type { Evento, EventosResponse } from "@/types/EventosResponse";
+import type { Evento, EventosResponse } from "@/types/EventosResponse"
 
-import { API } from "../configuracion/API.config";
+import { API } from "../providers/API.config"
 
 export const getEventos = async (): Promise<Evento[]> => {
-    const { data } = await API.get<EventosResponse>("/eventos");
-    return data.eventos;
-};
+    const { data } = await API.get<EventosResponse>("/eventos")
+    return data.eventos
+}

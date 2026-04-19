@@ -1,14 +1,13 @@
-import { useForm } from '@tanstack/react-form'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useForm } from "@tanstack/react-form"
+import { useState } from "react"
+import { Link, useNavigate } from "react-router"
 
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { validateEmail } from '@/helpers/validatos/validateEmail'
-import { Client } from '@/providers/Client.provider'
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { validateEmail } from "@/helpers/validateEmail"
+import { Client } from "@/providers/Client.provider"
 
 export const Register = () => {
-
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
 
@@ -16,7 +15,7 @@ export const Register = () => {
         defaultValues: {
             name: "",
             email: "",
-            password: ""
+            password: "",
         },
 
         onSubmit: async ({ value }) => {
@@ -27,29 +26,28 @@ export const Register = () => {
 
                 const { error } = await Client.signUp.email(value)
 
-                if (error) return;
+                if (error) return
 
-                navigate("/usuario");
+                navigate("/usuario")
             } finally {
                 setLoading(false)
             }
-        }
+        },
     })
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-blue-600">
+        <div className="flex min-h-screen items-center justify-center bg-blue-600">
             <form
-                className="w-full max-w-sm px-6 py-8 border bg-card shadow-sm flex flex-col gap-5"
+                className="bg-card flex w-full max-w-sm flex-col gap-5 border px-6 py-8 shadow-sm"
                 onSubmit={(e) => {
                     e.preventDefault()
                     Formulario.handleSubmit()
                 }}
             >
-
                 <h2>polotecno.melo - Register</h2>
 
                 {/* NAME */}
-                <Formulario.Field name='name'>
+                <Formulario.Field name="name">
                     {(F) => (
                         <Field>
                             <FieldLabel htmlFor="name">Nombre</FieldLabel>
@@ -68,10 +66,7 @@ export const Register = () => {
                 </Formulario.Field>
 
                 {/* EMAIL */}
-                <Formulario.Field
-                    name='email'
-                    validators={{ onBlur: validateEmail, onSubmit: validateEmail }}
-                >
+                <Formulario.Field name="email" validators={{ onBlur: validateEmail, onSubmit: validateEmail }}>
                     {(F) => (
                         <Field>
                             <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -85,15 +80,15 @@ export const Register = () => {
                                 type="email"
                                 value={F.state.value}
                             />
-                            <FieldDescription style={{ color: F.state.meta.errors?.[0] ? 'red' : undefined }}>
-                                {F.state.meta.errors?.[0] ?? 'Ingresa tu correo.'}
+                            <FieldDescription style={{ color: F.state.meta.errors?.[0] ? "red" : undefined }}>
+                                {F.state.meta.errors?.[0] ?? "Ingresa tu correo."}
                             </FieldDescription>
                         </Field>
                     )}
                 </Formulario.Field>
 
                 {/* PASSWORD */}
-                <Formulario.Field name='password'>
+                <Formulario.Field name="password">
                     {(F) => (
                         <Field>
                             <FieldLabel htmlFor="password">Contraseña</FieldLabel>
@@ -114,13 +109,13 @@ export const Register = () => {
 
                 {/* BUTTON */}
                 <button
-                    className="bg-black text-white py-2 rounded flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center gap-2 rounded bg-black py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={loading}
                     type="submit"
                 >
                     {loading ? (
                         <>
-                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                             Creando...
                         </>
                     ) : (
@@ -129,13 +124,12 @@ export const Register = () => {
                 </button>
 
                 {/* LINK LOGIN */}
-                <p className="text-sm text-center">
+                <p className="text-center text-sm">
                     Ya tienes cuenta?{" "}
                     <Link className="text-blue-800 underline" to="/autenticacion/login">
                         Iniciar sesion
                     </Link>
                 </p>
-
             </form>
         </div>
     )

@@ -14,7 +14,7 @@ const BASE_URL_AUTH = "http://localhost:3000"
 
 type Permisos = Record<string, string[]>
 
-const ACCIONES = ["ver", "crear", "editar", "eliminar"] as const
+const ACCIONES = ["crear", "editar", "eliminar"] as const
 
 const PERMISOS: Record<string, Permisos> = {
     root: {

@@ -9,8 +9,7 @@ export const Dashboard = () => {
         <SidebarProvider>
             <AppSidebar />
 
-            <main className="flex flex-col w-full">
-
+            <main className="flex w-full flex-col">
                 <DashboardHead />
 
                 {/* Contenido */}

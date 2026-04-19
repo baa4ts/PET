@@ -1,9 +1,4 @@
-import {
-    BookOpenTextIcon,
-    CalendarIcon,
-    ChartBarIcon,
-    UserIcon,
-    UsersThreeIcon} from "@phosphor-icons/react"
+import { BookOpenTextIcon, CalendarIcon, ChartBarIcon, UserIcon, UsersThreeIcon } from "@phosphor-icons/react"
 import { Link } from "react-router"
 
 import {
@@ -30,7 +25,6 @@ export function AppSidebar() {
                     <SidebarGroupLabel>Gestion</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
                                     <Link to="/dashboard/noticias">
@@ -57,7 +51,6 @@ export function AppSidebar() {
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -67,7 +60,6 @@ export function AppSidebar() {
                     <SidebarGroupLabel>Estadisticas</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
                                     <Link to="/dashboard/estadisticas-resumen">
@@ -76,7 +68,6 @@ export function AppSidebar() {
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -86,7 +77,6 @@ export function AppSidebar() {
                     <SidebarGroupLabel>Gestion usuarios</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-
                             <SidebarMenuItem>
                                 <SidebarMenuButton asChild>
                                     <Link to="/dashboard/gestion-usuarios">
@@ -95,11 +85,9 @@ export function AppSidebar() {
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
-
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
-
             </SidebarContent>
 
             <SidebarFooter />

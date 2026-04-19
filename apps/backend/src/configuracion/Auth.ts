@@ -25,7 +25,7 @@ export const auth = betterAuth({
             permisos: {
                 type: "string",
                 required: false,
-                input: true,
+                input: false,
                 defaultValue: "{}"
             },
         },

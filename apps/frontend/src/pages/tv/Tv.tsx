@@ -1,21 +1,18 @@
-import { SeccionAusencias } from "@/components/TV/SeccionAusencias";
-import { SeccionEventos } from "@/components/TV/SeccionEventos";
-import { SeccionNoticias } from "@/components/TV/SeccionNoticias";
+import { SeccionAusencias } from "@/components/TV/SeccionAusencias"
+import { SeccionEventos } from "@/components/TV/SeccionEventos"
+import { SeccionNoticias } from "@/components/TV/SeccionNoticias"
 
 export const Tv = () => {
-
-
     return (
-        <section className="w-screen h-screen flex flex-row overflow-hidden bg-blue-600">
-
+        <section className="flex h-screen w-screen flex-row overflow-hidden bg-blue-600">
             {/* Noticias */}
             <SeccionNoticias />
 
             {/* Panel derecho */}
-            <section className="w-2/6 flex flex-col p-4 gap-3 h-full">
+            <section className="flex h-full w-2/6 flex-col gap-3 p-4">
                 <SeccionAusencias />
                 <SeccionEventos />
             </section>
         </section>
-    );
-};
+    )
+}

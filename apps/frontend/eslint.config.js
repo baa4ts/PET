@@ -12,6 +12,7 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import sonarjs from 'eslint-plugin-sonarjs'
 import noSecrets from 'eslint-plugin-no-secrets'
 import pluginQuery from '@tanstack/eslint-plugin-query'
+import prettier from "eslint-config-prettier"
 
 export default defineConfig([
   globalIgnores(['dist', 'src/components/ui']),
@@ -49,4 +50,5 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  prettier
 ])

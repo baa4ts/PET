@@ -5,13 +5,14 @@ const Client = createAuthClient({
     baseURL: "http://localhost:3000",
     plugins: [
         inferAdditionalFields({
-            user: {
-                permisos: {
-                    type: "string"
-                }
-            }
-        })
-    ]
+            user: { permisos: { type: "string", required: false } },
+        }),
+    ],
 })
 
-export { Client }
+const cerrarSession = async (onSuccess?: () => void) =>
+    await Client.signOut({
+        fetchOptions: { onSuccess },
+    })
+
+export { cerrarSession, Client }
