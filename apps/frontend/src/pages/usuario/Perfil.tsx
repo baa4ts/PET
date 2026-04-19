@@ -1,16 +1,17 @@
 import { ArrowLeftIcon, ArrowRightIcon, EnvelopeIcon, IdentificationCardIcon, ShieldCheckIcon } from "@phosphor-icons/react"
 import { useMemo } from "react"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { parsearPermisos } from "@/helpers/permisos"
-import { Client } from "@/providers/Client.provider"
+import { cerrarSession, Client } from "@/providers/Client.provider"
 
 export const Perfil = () => {
     const { data: session } = Client.useSession()
+    const navigate = useNavigate()
 
     const permisos = useMemo(() => parsearPermisos(session?.user.permisos), [session?.user.permisos])
 
@@ -83,6 +84,10 @@ export const Perfil = () => {
                         )}
                     </CardContent>
                 </Card>
+
+                <Button onClick={() => cerrarSession(() => navigate("/autenticacion/login"))} variant="destructive">
+                    Cerrar sesion
+                </Button>
             </div>
         </div>
     )
