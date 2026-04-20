@@ -19,6 +19,20 @@ tags:
 
 components:
   schemas:
+    Meta:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 47
+        limit:
+          type: integer
+          nullable: true
+          example: 10
+        offset:
+          type: integer
+          example: 0
+
     Evento:
       type: object
       properties:
@@ -42,6 +56,7 @@ components:
 
     Ausencia:
       type: object
+      description: Ausencia retornada en GET (incluye docente anidado)
       properties:
         id:
           type: integer
@@ -59,6 +74,27 @@ components:
             name:
               type: string
               example: Juan Perez
+
+    AusenciaCreada:
+      type: object
+      description: Ausencia retornada tras POST (registro plano, sin docente anidado)
+      properties:
+        id:
+          type: integer
+          example: 1
+        materia:
+          type: string
+          example: Matematica
+        creado:
+          type: string
+          format: date-time
+          example: 2026-04-11T08:00:00.000Z
+        docenteId:
+          type: string
+          example: clxk2j3r40000abc123
+        publicadorId:
+          type: string
+          example: clxk2j3r40000xyz456
 
     Recurso:
       type: object
@@ -79,6 +115,9 @@ components:
         noticiaId:
           type: integer
           example: 1
+        userId:
+          type: string
+          example: clxk2j3r40000abc123
 
     Noticia:
       type: object
@@ -101,18 +140,30 @@ components:
           items:
             $ref: "#/components/schemas/Recurso"
 
-    Estadisticas:
+    EstadisticaItem:
       type: object
-      properties:
-        eventos:
-          type: integer
-          example: 5
-        noticias:
-          type: integer
-          example: 12
-        ausencias:
-          type: integer
-          example: 3
+      description: Objeto con una sola clave dinamica y su conteo
+      additionalProperties:
+        type: integer
+      example:
+        eventos: 5
+
+  parameters:
+    LimitParam:
+      in: query
+      name: limit
+      schema:
+        type: integer
+      required: false
+      description: Cantidad maxima de resultados a retornar. Si no se provee, se retornan todos los resultados sin limite.
+    OffsetParam:
+      in: query
+      name: offset
+      schema:
+        type: integer
+        default: 0
+      required: false
+      description: Cantidad de resultados a saltar. Por defecto 0.
 
   responses:
     NoAutorizado:
@@ -135,21 +186,7 @@ components:
             properties:
               mensaje:
                 type: string
-                example: Sin permisos
-
-    DatosInvalidos:
-      description: Body no paso la validacion de Zod
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mensaje:
-                type: string
-                example: Datos invalidos
-              data:
-                nullable: true
-                example: null
+                example: "Sin permisos para crear en eventos"
 
     ErrorServidor:
       description: Error interno del servidor
@@ -161,9 +198,6 @@ components:
               mensaje:
                 type: string
                 example: Error en el servidor
-              data:
-                nullable: true
-                example: null
 
 paths:
   /eventos:
@@ -172,19 +206,8 @@ paths:
       summary: Obtener eventos proximos
       description: Retorna todos los eventos cuya fecha no haya vencido aun, ordenados por fecha ascendente.
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Cantidad maxima de resultados a retornar.
-        - in: query
-          name: offset
-          schema:
-            type: integer
-            default: 0
-          required: false
-          description: Cantidad de resultados a saltar.
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/OffsetParam"
       responses:
         "200":
           description: OK o sin resultados
@@ -196,6 +219,8 @@ paths:
                   mensaje:
                     type: string
                     example: OK
+                  meta:
+                    $ref: "#/components/schemas/Meta"
                   eventos:
                     type: array
                     items:
@@ -205,6 +230,10 @@ paths:
                   summary: Con eventos
                   value:
                     mensaje: OK
+                    meta:
+                      total: 5
+                      limit: 10
+                      offset: 0
                     eventos:
                       - id: 1
                         nombre: Conferencia de tecnologia
@@ -215,14 +244,38 @@ paths:
                   summary: Sin eventos
                   value:
                     mensaje: No hay eventos disponibles
+                    meta:
+                      total: 0
+                      limit: 10
+                      offset: 0
                     eventos: []
         "500":
-          $ref: "#/components/responses/ErrorServidor"
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Error en el servidor
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+                  eventos:
+                    nullable: true
+                    example: null
+              example:
+                mensaje: Error en el servidor
+                meta:
+                  total: 0
+                  limit: null
+                  offset: 0
+                eventos: null
 
     post:
       tags: [Eventos]
       summary: Crear evento
-      description: Middlewares `requiereAuth` `requierePermiso("eventos", "crear")`
+      description: Middleware `requierePermiso("eventos", "crear")`. Requiere sesion activa.
       requestBody:
         required: true
         content:
@@ -257,7 +310,18 @@ paths:
                     items:
                       $ref: "#/components/schemas/Evento"
         "400":
-          $ref: "#/components/responses/DatosInvalidos"
+          description: Body no paso la validacion de Zod
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Datos invalidos
+                  eventos:
+                    nullable: true
+                    example: null
         "401":
           $ref: "#/components/responses/NoAutorizado"
         "403":
@@ -271,19 +335,8 @@ paths:
       summary: Obtener ausencias de hoy
       description: Retorna todas las ausencias del dia actual, ordenadas por fecha descendente.
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Cantidad maxima de resultados a retornar.
-        - in: query
-          name: offset
-          schema:
-            type: integer
-            default: 0
-          required: false
-          description: Cantidad de resultados a saltar.
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/OffsetParam"
       responses:
         "200":
           description: OK o sin resultados
@@ -295,6 +348,8 @@ paths:
                   mensaje:
                     type: string
                     example: OK
+                  meta:
+                    $ref: "#/components/schemas/Meta"
                   ausencias:
                     type: array
                     items:
@@ -304,6 +359,10 @@ paths:
                   summary: Con ausencias
                   value:
                     mensaje: OK
+                    meta:
+                      total: 3
+                      limit: 10
+                      offset: 0
                     ausencias:
                       - id: 1
                         materia: Matematica
@@ -314,14 +373,38 @@ paths:
                   summary: Sin ausencias
                   value:
                     mensaje: No hay ausencias disponibles
+                    meta:
+                      total: 0
+                      limit: 10
+                      offset: 0
                     ausencias: []
         "500":
-          $ref: "#/components/responses/ErrorServidor"
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Error en el servidor
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+                  ausencias:
+                    nullable: true
+                    example: null
+              example:
+                mensaje: Error en el servidor
+                meta:
+                  total: 0
+                  limit: null
+                  offset: 0
+                ausencias: null
 
     post:
       tags: [Ausencias]
       summary: Crear ausencia
-      description: Middlewares `requiereAuth` `requierePermiso("ausencias", "crear")`
+      description: Middleware `requierePermiso("ausencias", "crear")`. Requiere sesion activa.
       requestBody:
         required: true
         content:
@@ -350,9 +433,20 @@ paths:
                   ausencias:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Ausencia"
+                      $ref: "#/components/schemas/AusenciaCreada"
         "400":
-          $ref: "#/components/responses/DatosInvalidos"
+          description: Body no paso la validacion de Zod
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Datos invalidos
+                  ausencias:
+                    nullable: true
+                    example: null
         "401":
           $ref: "#/components/responses/NoAutorizado"
         "403":
@@ -366,19 +460,8 @@ paths:
       summary: Obtener noticias recientes
       description: Retorna todas las noticias publicadas en las ultimas 24 horas, ordenadas por fecha descendente.
       parameters:
-        - in: query
-          name: limit
-          schema:
-            type: integer
-          required: false
-          description: Cantidad maxima de resultados a retornar.
-        - in: query
-          name: offset
-          schema:
-            type: integer
-            default: 0
-          required: false
-          description: Cantidad de resultados a saltar.
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/OffsetParam"
       responses:
         "200":
           description: OK o sin resultados
@@ -390,6 +473,8 @@ paths:
                   mensaje:
                     type: string
                     example: OK
+                  meta:
+                    $ref: "#/components/schemas/Meta"
                   noticias:
                     type: array
                     items:
@@ -399,6 +484,10 @@ paths:
                   summary: Con noticias
                   value:
                     mensaje: OK
+                    meta:
+                      total: 12
+                      limit: 10
+                      offset: 0
                     noticias:
                       - id: 1
                         titulo: Nueva actualizacion del sistema
@@ -410,18 +499,43 @@ paths:
                             fecha: "2026-04-11T10:30:00.000Z"
                             es_noticia: true
                             noticiaId: 1
+                            userId: clxk2j3r40000abc123
                 sin_resultados:
                   summary: Sin noticias
                   value:
                     mensaje: No hay noticias disponibles
+                    meta:
+                      total: 0
+                      limit: 10
+                      offset: 0
                     noticias: []
         "500":
-          $ref: "#/components/responses/ErrorServidor"
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Error en el servidor
+                  meta:
+                    $ref: "#/components/schemas/Meta"
+                  noticias:
+                    nullable: true
+                    example: null
+              example:
+                mensaje: Error en el servidor
+                meta:
+                  total: 0
+                  limit: null
+                  offset: 0
+                noticias: null
 
     post:
       tags: [Noticias]
       summary: Crear noticia
-      description: Middlewares `requiereAuth` `requierePermiso("noticias", "crear")`. Acepta hasta 5 archivos en el campo `recursos` (jpg, jpeg, png, webp, pdf — max 10MB por archivo).
+      description: Middleware `requierePermiso("noticias", "crear")`. Requiere sesion activa. Acepta hasta 5 archivos en el campo `recursos` (jpg, jpeg, png, webp, pdf — max 10MB por archivo).
       requestBody:
         required: true
         content:
@@ -457,7 +571,18 @@ paths:
                     items:
                       $ref: "#/components/schemas/Noticia"
         "400":
-          $ref: "#/components/responses/DatosInvalidos"
+          description: Body no paso la validacion de Zod
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Datos invalidos
+                  noticias:
+                    nullable: true
+                    example: null
         "401":
           $ref: "#/components/responses/NoAutorizado"
         "403":
@@ -469,7 +594,7 @@ paths:
     get:
       tags: [Estadisticas]
       summary: Obtener estadisticas globales
-      description: Retorna el conteo total de eventos, noticias y ausencias. Middleware `requiereAuth`.
+      description: Retorna el conteo total de eventos, noticias, ausencias, usuarios y sesiones como array de objetos con clave dinamica. Middleware `requiereAuth`.
       responses:
         "200":
           description: OK
@@ -482,14 +607,29 @@ paths:
                     type: string
                     example: OK
                   estadisticas:
-                    $ref: "#/components/schemas/Estadisticas"
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/EstadisticaItem"
               example:
                 mensaje: OK
                 estadisticas:
-                  eventos: 5
-                  noticias: 12
-                  ausencias: 3
+                  - eventos: 5
+                  - noticias: 12
+                  - ausencias: 3
+                  - usuarios: 20
+                  - sesiones: 8
         "401":
           $ref: "#/components/responses/NoAutorizado"
         "500":
-          $ref: "#/components/responses/ErrorServidor"
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                    example: Error en el servidor
+                  estadisticas:
+                    nullable: true
+                    example: null

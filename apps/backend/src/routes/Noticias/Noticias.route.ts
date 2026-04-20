@@ -5,7 +5,7 @@ import { Archivos } from "@/middlewares/Archivos.middleware";
 import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { NoticiaSchema } from "./Noticias.scheme";
-import { parsePagination } from "@/Helpers/ParsePagination";
+import { parsePagination } from "@/Helpers/Args";
 
 /**
  *
@@ -16,41 +16,35 @@ const API = Router();
 
 
 API.get("/", async (req: Request, res: Response) => {
+    const { limit, offset } = parsePagination(req.query)
+
     try {
+        const [resultados, total] = await prisma.$transaction([
+            prisma.noticia.findMany({
+                where: { publicado: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } },
+                orderBy: { publicado: "desc" },
+                include: { recursos: true },
+                omit: { userId: true },
+                take: limit,
+                skip: offset
+            }),
+            prisma.noticia.count({
+                where: { publicado: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }
+            })
+        ])
 
-        const { limit, offset } = parsePagination(req.query)
-
-        const resultados = await prisma.noticia.findMany({
-            where: {
-                publicado: {
-                    // 24 Horas
-                    gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
-                }
-            },
-            orderBy: {
-                publicado: "desc",
-            },
-            include: {
-                recursos: true
-            },
-            omit: {
-                userId: true
-            },
-            take: limit,
-            skip: offset
-        })
+        const meta = { total, limit, offset }
 
         if (resultados.length === 0) {
-            return res.status(200).json({ mensaje: "No hay noticias disponibles", noticias: [] })
+            return res.status(200).json({ mensaje: "No hay noticias disponibles", meta, noticias: [] })
         }
 
-        return res.status(200).json({ mensaje: "OK", noticias: resultados })
+        return res.status(200).json({ mensaje: "OK", meta, noticias: resultados })
 
     } catch (error) {
-        return res.status(500).json({ mensaje: "Error en el servidor", noticias: null })
+        return res.status(500).json({ mensaje: "Error en el servidor", meta: { total: 0, limit, offset }, noticias: null })
     }
 })
-
 
 API.post("/",
 

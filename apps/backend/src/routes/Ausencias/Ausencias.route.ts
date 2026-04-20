@@ -4,7 +4,7 @@ import { prisma } from "@/configuracion/Prisma";
 import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { AusenciaSchema } from "./Ausencias.scheme";
-import { parsePagination } from "@/Helpers/ParsePagination";
+import { parsePagination } from "@/Helpers/Args";
 
 /**
  *
@@ -31,45 +31,39 @@ const API = Router();
 
 
 API.get("/", async (req: Request, res: Response) => {
+    const { limit, offset } = parsePagination(req.query)
+
     try {
+        const [resultados, total] = await prisma.$transaction([
+            prisma.ausencia.findMany({
+                where: { creado: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } },
+                orderBy: { creado: "desc" },
+                select: {
+                    creado: true,
+                    materia: true,
+                    id: true,
+                    docente: { select: { name: true } }
+                },
+                take: limit,
+                skip: offset,
+            }),
+            prisma.ausencia.count({
+                where: { creado: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } }
+            })
+        ])
 
-        const { limit, offset } = parsePagination(req.query)
-
-        const resultados = await prisma.ausencia.findMany({
-            where: {
-                creado: {
-                    gte: new Date(new Date().setHours(0, 0, 0, 0))
-                }
-            },
-            orderBy: {
-                creado: "desc",
-            },
-            select: {
-                creado: true,
-                materia: true,
-                id: true,
-                docente: {
-                    select:
-                    {
-                        name: true
-                    }
-                }
-            },
-            take: limit,
-            skip: offset,
-        })
+        const meta = { total, limit, offset }
 
         if (resultados.length === 0) {
-            return res.status(200).json({ mensaje: "No hay ausencias disponibles", ausencias: [] })
+            return res.status(200).json({ mensaje: "No hay ausencias disponibles", meta, ausencias: [] })
         }
 
-        return res.status(200).json({ mensaje: "OK", ausencias: resultados })
+        return res.status(200).json({ mensaje: "OK", meta, ausencias: resultados })
 
     } catch (error) {
-        return res.status(500).json({ mensaje: "Error en el servidor", ausencias: null })
+        return res.status(500).json({ mensaje: "Error en el servidor", meta: { total: 0, limit, offset }, ausencias: null })
     }
 })
-
 
 API.post("/", requierePermiso("ausencias", "crear"), async (req: Request, res: Response) => {
 
@@ -93,7 +87,6 @@ API.post("/", requierePermiso("ausencias", "crear"), async (req: Request, res: R
         return res.status(500).json({ mensaje: "Error en el servidor", ausencias: null })
     }
 })
-
 
 /**
  *

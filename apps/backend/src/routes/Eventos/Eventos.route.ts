@@ -1,10 +1,10 @@
 import { Request, Response, Router } from "express";
 
 import { prisma } from "@/configuracion/Prisma";
-import { requiereAuth, requierePermiso } from "@/middlewares/Auth.middleware";
+import { requierePermiso } from "@/middlewares/Auth.middleware";
 
 import { EventoSchema } from "./Eventos.scheme";
-import { parsePagination } from "@/Helpers/ParsePagination";
+import { parsePagination } from "@/Helpers/Args";
 
 /**
  *
@@ -15,36 +15,32 @@ const API = Router();
 
 
 API.get("/", async (req: Request, res: Response) => {
+    const { limit, offset } = parsePagination(req.query)
+
     try {
-        const { limit, offset } = parsePagination(req.query)
+        const [resultados, total] = await prisma.$transaction([
+            prisma.eventos.findMany({
+                where: { fecha: { gte: new Date() } },
+                orderBy: { fecha: "asc" },
+                omit: { userId: true },
+                take: limit,
+                skip: offset
+            }),
+            prisma.eventos.count({
+                where: { fecha: { gte: new Date() } }
+            })
+        ])
 
-        const resultados = await prisma.eventos.findMany({
-            // Filtrar por los eventos que no hayan vencido aun
-            where: {
-                fecha: {
-                    gte: new Date()
-                }
-            },
-
-            // Ordenarlos por los que estan mas proximos aun
-            orderBy: {
-                fecha: "asc",
-            },
-            omit: {
-                userId: true
-            },
-            take: limit,
-            skip: offset
-        })
+        const meta = { total, limit, offset }
 
         if (resultados.length === 0) {
-            return res.status(200).json({ mensaje: "No hay eventos disponibles", eventos: [] })
+            return res.status(200).json({ mensaje: "No hay eventos disponibles", meta, eventos: [] })
         }
 
-        return res.status(200).json({ mensaje: "OK", eventos: resultados })
+        return res.status(200).json({ mensaje: "OK", meta, eventos: resultados })
 
     } catch (error) {
-        return res.status(500).json({ mensaje: "Error en el servidor", eventos: null })
+        return res.status(500).json({ mensaje: "Error en el servidor", meta: { total: 0, limit, offset }, eventos: null })
     }
 })
 
